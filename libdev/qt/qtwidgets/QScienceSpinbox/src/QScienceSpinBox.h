@@ -22,19 +22,36 @@
 #ifndef __QScienceSpinBox_H__
 #define __QScienceSpinBox_H__
 
+/** DLL Creation Defintion */
+#include <QtCore/QtGlobal>
+#ifdef QSCIENCESPINBOX_DLL
+
+#ifdef QSCIENCESPINBOX_MAKEDLL     // create a DLL library
+#define QSCIENCESPINBOX_EXPORT Q_DECL_EXPORT
+#else                                   // use a DLL library
+#define QSCIENCESPINBOX_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // QSCIENCESPINBOX_DLL
+
+#ifndef QSCIENCESPINBOX_EXPORT
+#define QSCIENCESPINBOX_EXPORT
+#endif
+
+
 #include <QDoubleSpinBox>
 #include <QString>
-
 #include <QScopedPointer>
 
 class QScienceSpinBoxPrivate;
 
-class QScienceSpinBox : public QDoubleSpinBox
+class QSCIENCESPINBOX_EXPORT QScienceSpinBox : public QDoubleSpinBox
 {
     Q_OBJECT
+
 public:
     QScienceSpinBox(QWidget * parent = 0);
-    ~QScienceSpinBox();
+    virtual ~QScienceSpinBox();
 
     int decimals() const;
     void setDecimals(int value);
@@ -42,25 +59,24 @@ public:
     QString textFromValue ( double value ) const;
     double valueFromText ( const QString & text ) const;
 
+public slots:
+
+    void stepDown();
+    void stepUp();
 
 protected:
-    //const QScopedPointer<QScienceSpinBoxPrivate> d_ptr;
+    const QScopedPointer<QScienceSpinBoxPrivate> d_ptr;
 
 private:
-    //Q_DECLARE_PRIVATE(QScienceSpinBox)
-
-private:
-    QScienceSpinBoxPrivate* d;
+    // declares QScienceSpinBoxPrivate d_func()
+    // requires d_ptr
+    Q_DECLARE_PRIVATE(QScienceSpinBox)
 
 private:
     // overwritten virtual function of QAbstractSpinBox
     QValidator::State validate(QString &text, int &pos) const;
     void fixup(QString &input) const;
     void stepBy(int steps);
-
-public slots:
-    void stepDown();
-    void stepUp();
 
 };
 

@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+#include "mainwindow.h"
 
 
 MainWindow::MainWindow( QWidget* parent /*= 0*/, Qt::WindowFlags flags /*= 0*/ ) : QMainWindow(parent, flags)
