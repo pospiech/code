@@ -1,0 +1,63 @@
+// Basic usage of fftw
+
+#include  <fftw3.h>
+...
+
+// special typedef format - compatible with std::complex<double>
+fftw_complex  *in;
+fftw_complex  *out;
+
+// plan, which saves the computation that shall be performed
+// creation of plan defines the optimization
+fftw_plan  p;
+
+// allocate memory using the special fftw_malloc
+// this is necessary since the lib requires special alignment
+in  =  (fftw_complex*)  fftw_malloc(sizeof(fftw_complex)  *  N);
+out  =  (fftw_complex*)  fftw_malloc(sizeof(fftw_complex)  *  N);
+
+// define that threads are going to be used - required once
+int  fftw_init_threads(void);
+
+// set for the next plan how much threads to use
+void  fftw_plan_with_nthreads(int  nthreads);
+
+// create plan using the arrays and all availble information
+p  =  fftw_plan_dft_1d(N,  in,  out,  FFTW_FORWARD,  FFTW_ESTIMATE);
+
+// execute the fft
+fftw_execute(p);  /*  repeat as needed  */
+
+// clean up using special functions
+fftw_destroy_plan(p);
+fftw_free(in);  
+fftw_free(out);
+
+
+// --- Saving / Reading plans ---
+
+// The wisdom is cumulative, and is stored in a global, 
+// private data structure managed internally by FFTW.
+
+void  fftw_export_wisdom_to_file(FILE  *output_file);
+int   fftw_import_wisdom_from_file(FILE  *input_file);
+
+// to/from char
+char  *fftw_export_wisdom_to_string(void);
+int  fftw_import_wisdom_from_string(const  char  *input_string);
+
+// forget all wisdom completely (free memory)
+void  fftw_forget_wisdom(void);
+
+// nerd-readable plan
+void  fftw_fprint_plan(const  fftw_plan  plan,  FILE  *output_file);
+void  fftw_print_plan(const  fftw_plan  plan);
+
+//  --- New-array Execute Functions ---
+Restrictions:
+- plans must match the arrays in sizes 
+- in or out order must match
+- alignment must be correct - stronlgy requires fftw_malloc 
+
+// Execution:
+void  fftw_execute_dft(const  fftw_plan  p, fftw_complex  *in,  fftw_complex  *out);

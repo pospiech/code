@@ -1,0 +1,3 @@
+- save plans to settingsfile
+- delete all plans on request
+- save plans in singleton, such that all fft instance can use the same plans
