@@ -1,0 +1,59 @@
+/* -*- mode: C++ ; c-file-style: "stroustrup" -*- *****************************
+ * Plot Tools Library (based on Qwt)
+ * Copyright (C) 2016   Matthias Pospiech
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the Qwt License, Version 1.0
+ *****************************************************************************/
+
+
+/*
+  This file contains NO source code, just some documentation for doxygen to
+  parse.
+*/
+
+/*!
+  \mainpage Plot Tools - Qwt Derived Classes with simplified usage
+
+This library contains several classes for the creation of Line plots (vector data) or
+2D false color plots (matrix data).
+These classes are derived from Qwt Classes with enhanced features or simplified
+interface. The value type is assumed double in all classes (as also Qwt uses double).
+
+
+  \image html plot.png
+  \tableofcontents
+
+
+  \if homepage
+  \section homepage Project page
+  The official project page is hosted at 
+    <a href="http://qwt.sourceforge.net">sourceforge</a>
+  \endif
+
+  \section license License
+
+  Plot Tools is distributed under the terms of the \ref qwtlicense.
+
+  \section downloads Downloads
+  Stable releases or prereleases are available at the Qwt <a href="http://sourceforge.net/projects/qwt/files">project page</a>.
+
+  For getting a development snapshot from the Git repository:
+  \code svn export svn://svn.code.sf.net/p/qwt/code/trunk/qwt \endcode
+
+  \section installonmainpage Installation
+
+  Plot Tools is a header only library and thus does not need to be compiled.
+  For compilation of the example use the .pro file.
+  Note that the corresponding Qwt library file is required as well.
+ 
+  \section credits Credits
+  \par Authors: 
+    Matthias Pospiech
+*/
+
+/*!
+  \page qwtlicense Qwt License, Version 1.0
+  \include "COPYING"
+*/
+

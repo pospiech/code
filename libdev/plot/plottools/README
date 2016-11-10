@@ -1,0 +1,39 @@
+
+The _Plot Tools_ Library (based on Qwt)
+---------------------------------------
+
+      Qwt is an extension to the libraries of the Qt Project.  
+	  The _Plot Tools_ Library is and additional extension to Qwt Plots.
+	  
+	  It allows the simplified creation of line and matrix plots
+	  using overloaded class defintions and included functionality.
+	  These classes support right away:
+	  - line plots
+	  - zooming, even with 2 Y axis
+	  - grids
+	  - [new] color palettes for nice line colors
+	  - matrix pseudo color plots (Spectrogram)
+	  - [new] color maps like (jet, gray)
+
+
+      Qwt is hosted at http://qwt.sf.net
+	  Plot Tools is hosted at ...
+
+Installation
+------------
+      
+	  Read INSTALL how to build and install Plot Tools.
+
+Copyright
+---------
+
+    Plot Tools 
+    Copyright (C) 2016   Matthias Pospiech
+    
+    Plot Tools is published under the Qwt License, Version 1.0.
+    You should have received a copy of this licence in the file
+    COPYING.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
