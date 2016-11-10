@@ -2,11 +2,11 @@
 The _Plot Tools_ Library (based on Qwt)
 ---------------------------------------
 
-      Qwt is an extension to the libraries of the Qt Project.  
-	  The _Plot Tools_ Library is and additional extension to Qwt Plots.
+      The _Plot Tools_ Library is an extension to Qwt Plots.
+	  Qwt is an extension to the libraries of the Qt Project.  	  
 	  
 	  It allows the simplified creation of line and matrix plots
-	  using overloaded class defintions and included functionality.
+	  using overloaded class definitions and included functionality.
 	  These classes support right away:
 	  - line plots
 	  - zooming, even with 2 Y axis
@@ -16,13 +16,15 @@ The _Plot Tools_ Library (based on Qwt)
 	  - [new] color maps like (jet, gray)
 
 
-      Qwt is hosted at http://qwt.sf.net
-	  Plot Tools is hosted at ...
+      Plot Tools is hosted at https://github.com/pospiech/code/tree/master/libdev/plot/plottools
+	  Qwt is hosted at http://qwt.sf.net
+	  
 
 Installation
 ------------
       
-	  Read INSTALL how to build and install Plot Tools.
+	  The library contains only header files and requires no installation.
+	  Add the plot tools path to your C++ project and use the classes.
 
 Copyright
 ---------
