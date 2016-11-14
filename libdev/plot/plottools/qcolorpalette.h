@@ -12,6 +12,31 @@
 #include <vector>
 #include <QColor>
 
+/*!
+    \class QColorPalette
+    \brief Select colors according to a well definte color palette
+
+    Implemented Palettes are
+    - Standard,
+    - StandardDark,
+    - MSOffice2007,
+    - Gnuplot,
+    - Oxygen,
+    - Pale
+
+    Example:
+    @code
+    QLinePlot * plot = new QLinePlot();
+    ...
+    QPlotCurve curve = new QPlotCurve();
+    ...
+    curve->attach( plot );
+    // curves must be attached to plot, otherwise
+    // palette can not be applied (works in list of curves)
+    plot->setColorPalette(QColorPalette::MSOffice2007);
+    @endcode
+ */
+
 class QColorPalette
 {
 public:
@@ -24,8 +49,10 @@ public:
         Pale
     };
 
-
-
+    //! Create vector of QColors with selected palette
+    //!
+    //! \param id QColorPalette::paletteIdentifier
+    //! \param totalnumber maximum number of used colors, palette is different for number of colors.
     static std::vector<QColor> colors(paletteIdentifier id = QColorPalette::Standard, size_t totalnumber = 0)
     {
         if (totalnumber > 6) { totalnumber = 6; }
@@ -153,6 +180,13 @@ public:
         return colors;
     }
 
+    //! Get n-th color of selected palette
+    //!
+    //! \param number selected index
+    //! \param id QColorPalette::paletteIdentifier
+    //! \param totalnumber maximum number of used colors, palette is different for number of colors.
+    //!
+    //! \sa colors
     static QColor color(size_t number, paletteIdentifier id = QColorPalette::Standard, size_t totalnumber = 0)
     {
         std::vector<QColor> colorPalette = QColorPalette::colors(id, totalnumber);

@@ -15,36 +15,30 @@
 /*!
   \mainpage Plot Tools - Qwt Derived Classes with simplified usage
 
-This library contains several classes for the creation of Line plots (vector data) or
-2D false color plots (matrix data).
-These classes are derived from Qwt Classes with enhanced features or simplified
+This library contains several classes for the creation of Line plots (vector data) or <br>
+2D false color plots (matrix data). <br>
+These classes are derived from Qwt Classes with enhanced features or simplified <br>
 interface. The value type is assumed double in all classes (as also Qwt uses double).
 
 
-  \image html plot.png
+  \image html plottoolsexample.png
   \tableofcontents
-
-
-  \if homepage
-  \section homepage Project page
-  The official project page is hosted at 
-    <a href="http://qwt.sourceforge.net">sourceforge</a>
-  \endif
 
   \section license License
 
-  Plot Tools is distributed under the terms of the \ref qwtlicense.
+  Plot Tools is distributed under the terms of the LGPL with the <br>
+  additions of the Qwt License.
 
   \section downloads Downloads
-  Stable releases or prereleases are available at the Qwt <a href="http://sourceforge.net/projects/qwt/files">project page</a>.
+  Currently no downloads provided.
 
-  For getting a development snapshot from the Git repository:
-  \code svn export svn://svn.code.sf.net/p/qwt/code/trunk/qwt \endcode
+  The latest snaphost is available from the Git repository: <br>
+  <a href="https://github.com/pospiech/code/tree/master/libdev/plot/plottools">https://github.com/pospiech/code/</a>
 
   \section installonmainpage Installation
 
-  Plot Tools is a header only library and thus does not need to be compiled.
-  For compilation of the example use the .pro file.
+  Plot Tools is a header only library and thus does not need to be compiled.<br>
+  For compilation of the example use the .pro file.<br>
   Note that the corresponding Qwt library file is required as well.
  
   \section credits Credits

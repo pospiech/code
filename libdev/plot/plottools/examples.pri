@@ -8,7 +8,6 @@ QT += opengl
 greaterThan(QT_MAJOR_VERSION, 4) {
     QT += widgets
     QT += printsupport
-#    QT += concurrent
 }
 
 # #####################################################################
@@ -59,9 +58,6 @@ UI_DIR = $${BUILD_DIR}/ui
 # #####################################################################
 # FILES
 # #####################################################################
-
-# C:\Users\matthias\Documents\svn\CPP\libs\qwt-6.1.3
-# C:\Users\matthias\Documents\svn\CPP\playground\qwtplot\plottools
 
 QWT_PATH = $${PWD}/../../../libs/qwt-6.1.3
 

@@ -52,6 +52,9 @@
 
     plotMatrix->replot();
     @endcode
+
+    Resulting plot, using a Matrix with 1000x1000 points <br>
+    \image html matrixPlot.png
  */
 
 class QMatrixPlot : public QBasePlotWidget

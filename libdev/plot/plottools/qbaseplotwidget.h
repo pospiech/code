@@ -23,6 +23,31 @@
 
 #include "qplotzoomer.h"
 
+
+/*!
+    \class QBasePlotWidget
+    \brief Base class for all QwtPlot derived classes in this library
+
+    Use QBasePlotWidget as you would use QwtPlot,
+    so for any further reading refer to the Qwt documention.
+
+    Additionally to QwtPlot this class offers:
+    - default QPlotZoomer zoomers, first for left y-axis, second (disabled by default) for the right y-axis
+    - grid, disabled by default
+    - the canvas (not accessible with QwtPlot)
+    - a renderer function (not tested though!)
+
+    Thus all classes derived from QBasePlotWidget provide a default zoom function.
+
+    @code
+    // exchange
+    QwtPlot * plot = new QwtPlot();
+    // with
+    QBasePlotWidget * plot = new QBasePlotWidget();
+    // or derive from QBasePlotWidget
+    @endcode
+ */
+
 class QBasePlotWidget : public QwtPlot
 {
     Q_OBJECT
@@ -30,25 +55,27 @@ public:
     QBasePlotWidget(QWidget* parent = 0)
         : QwtPlot(parent)
     {
+        // set expanding size policy
         QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         sizePolicy.setHorizontalStretch(20);
         sizePolicy.setVerticalStretch(20);
         QWidget::setSizePolicy(sizePolicy);
 
+        // set dault margins for Widget
         const int margin = 5;
         QWidget::setContentsMargins( margin, margin, margin, 0 );
 
-        QwtPlotCanvas *canvas = new QwtPlotCanvas();
-        canvas->setBorderRadius( 1 );
-        canvas->setLineWidth(1);
-        QwtPlot::setCanvas( canvas );
+        // set canvas with white background.
+        m_canvas = new QwtPlotCanvas();
+        m_canvas->setBorderRadius( 1 );
+        m_canvas->setLineWidth(1);
+        QwtPlot::setCanvas( m_canvas );
         QwtPlot::setCanvasBackground( Qt::white );
 
         QwtPlot::setFrameStyle(QFrame::NoFrame);
-
         QwtPlot::plotLayout()->setAlignCanvasToScales(true);
 
-        /// set axis scale
+        // set axis scale
         QwtPlot::setAxisAutoScale(QwtPlot::xBottom);
         QwtPlot::setAxisAutoScale(QwtPlot::yLeft);
         QwtPlot::setAxisAutoScale(QwtPlot::yRight);
@@ -93,23 +120,46 @@ public:
             delete m_grid;
     }
 
+    //! Zoomer for Y1 axis
+    //!
+    //! \return pointer to QwtPlotZoomer
     QwtPlotZoomer * zoomerY1() const
     {
         return m_zoomerY1;
     }
 
+    //! Zoomer for Y2 axis
+    //!
+    //! \return pointer to QwtPlotZoomer
     QwtPlotZoomer * zoomerY2() const
     {
         return m_zoomerY2;
     }
 
+    //! Grid attached to QwtPlot
+    //!
+    //! \return pointer to QwtPlotZoomer
     QwtPlotGrid * grid() const
     {
         return m_grid;
     }
 
+    //! Canvas used by QwtPlot
+    //!
+    //! The canvas pointer must not be changed in QwtPlot
+    //! since it makes this pointer invalid and will
+    //! leads to a crash of all zoomers.
+    //!
+    //! \return pointer to QwtPlotCanvas
+    QwtPlotCanvas * canvas() const
+    {
+        return m_canvas;
+    }
+
 #ifndef QT_NO_PRINTER
 
+    //! Print the plot
+    //! \note not tested!
     void printPlot(QString filename = "plot")
     {
         QPrinter printer( QPrinter::HighResolution );
@@ -140,6 +190,7 @@ private:
     QwtPlotZoomer * m_zoomerY1;
     QwtPlotZoomer * m_zoomerY2;
     QwtPlotGrid * m_grid;
+    QwtPlotCanvas * m_canvas;
 };
 
 #endif // QBASEPLOTWIDGET_H

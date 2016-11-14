@@ -21,7 +21,7 @@
     \class QLinePlot
     \brief Class for the creation of line plots with multiple curves on a single or both Y-Axis
 
-    Example with
+    The following code shows and example with
     - two y-axis,
     - a legend below,
     - zoomer set up for both y-axis
@@ -74,6 +74,11 @@
     plot2->setColorPalette(QColorPalette::MSOffice2007);
 
     @endcode
+
+    Resulting plot, using a vector of 100 points, with two curves attached to left and right y-axis. <br>
+
+    \image html linePlot2.png
+
  */
 
 

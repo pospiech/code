@@ -71,8 +71,15 @@ public:
         xaxis.clear();
         ydata.clear();
         // copy to internal vector
-        xaxis = std::vector<double>(x);
-        ydata = std::vector<double>(y);
+        try {
+            xaxis = std::vector<double>(x);
+            ydata = std::vector<double>(y);
+        } catch (std::bad_alloc const&) {
+            qCritical() << "Memory allocation fail!" << endl;
+            xaxis.clear();
+            ydata.clear();
+            return;
+        }
         QwtPlotCurve::setRawSamples(&xaxis[0], &ydata[0], xaxis.size());
     }
 

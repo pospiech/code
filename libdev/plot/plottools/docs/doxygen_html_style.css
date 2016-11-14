@@ -1,0 +1,8 @@
+div.image img[src="plottoolsexample.png"]{ 
+    width:600px; 
+}
+
+.image
+{
+   text-align: left;
+}
