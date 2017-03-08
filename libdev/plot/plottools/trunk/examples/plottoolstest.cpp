@@ -23,7 +23,6 @@ QWidget * createLinePlot(vector<double> & x, vector<double> & y1)
     /// first plot (single line)
     QLinePlot * plot1 = new QLinePlot();
     plot1->setTitle( "Plot Demo - single Y axis" );
-    plot1->canvas()->setBorderRadius( 10 );
 
     // legend item
     QwtPlotLegendItem * legendItem = new QwtPlotLegendItem();

@@ -5,6 +5,7 @@
 #include "constants.h"
 #include <cmath>
 #include <float.h>
+//#include <QDebug>
 
 namespace PlotFunction
 {

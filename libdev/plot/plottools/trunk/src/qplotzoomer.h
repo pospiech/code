@@ -12,7 +12,19 @@
 #include <qwt_plot.h>
 #include <qwt_plot_zoomer.h>
 
+#include <QMap>
+#include <array>
+
 //#define DEBUG_QPLOTEXT 1
+
+struct PlotScale{
+public:
+    PlotScale() {}
+    PlotScale(double new_min, double new_max): min(new_min), max(new_max) {}
+    double min;
+    double max;
+};
+
 
 /*!
     \class QPlotZoomer
@@ -73,6 +85,21 @@ public:
 
     }
 
+    //! Set manual scale that must be used by zoomer
+    void setAxisScale (int axisId, double min, double max)
+    {
+        // insert or change value in map
+        mapScale.insert(axisId, PlotScale (min, max));
+    }
+
+    //! Set scale to auto, so that zoomer does not fix a manual scale
+    //! Only necessary if a manual scale was applied.
+    void setAxisAutoScale (int axisId)
+    {
+        // remove axisID from map
+        mapScale.remove(axisId);
+    }
+
 
 private slots:
     /*!
@@ -92,8 +119,20 @@ private slots:
         // zoomed state and state is at the initual size
         if ( zoomRectIndex() == 0 && zoomStack().size() > 1 )
         {
-            m_plot->setAxisAutoScale(xAxis());
-            m_plot->setAxisAutoScale(yAxis());
+            std::array<int,4> axisIDs = {QwtPlot::yLeft,
+                                         QwtPlot::yRight,
+                                         QwtPlot::xBottom,
+                                         QwtPlot::xTop};
+            // iterate over all axis Ids
+            for (auto &axisID : axisIDs)
+            {
+                if ( mapScale.contains(axisID) ) {
+                    PlotScale scale = mapScale[axisID];
+                    m_plot->setAxisScale(axisID, scale.min, scale.max);
+                } else {
+                    m_plot->setAxisAutoScale(axisID);
+                }
+            }
             setZoomBase(true);
         }
         debugZoomerStack();
@@ -134,7 +173,7 @@ private:
 
 private:
     QwtPlot * m_plot;
-
+    QMap<int, PlotScale> mapScale;
 };
 
 

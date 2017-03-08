@@ -114,6 +114,20 @@ public:
         return curveList;
     }
 
+    //! Return pointer of attached QPlotCurve
+    //!
+    //! \return QPlotCurve pointer
+    QPlotCurve* curve(size_t index)
+    {
+        std::vector<QPlotCurve*> curvePointerList = curves();
+        if (!(index < curvePointerList.size())) {
+            qFatal(QString("QPlotCurve: requested curve at index %1, but maximum number is %2").arg(index).arg(curvePointerList.size()).toLatin1());
+        }
+
+        return curvePointerList[index];
+    }
+
+
 
     //! set margin for all curves, used in QPlotCurve to define a margin
     //! to the axis boundaries
@@ -151,26 +165,30 @@ public:
 
     }
 
-    //! delete all PlotItems (and thus also curves) from the plot
+    //! delete all QPlotCurve items from the plot
     void clear()
     {
         QList<QwtPlotItem *> listItems = this->itemList();
         for( int i=0; i<listItems.count(); ++i )
         {
-            listItems[i]->detach();
-            delete listItems[i];
+            // delete only QPlotCurve
+            QPlotCurve* derived = dynamic_cast<QPlotCurve*>(listItems[i]);
+            if (derived) {
+                listItems[i]->detach();
+                delete listItems[i];
+            }
         }
     }
 
 
-    //! overwrites `QwtPlot::setAxisScale`
+    //! overwrites `QBasePlotWidget::setAxisScale`
     //! uses the internal margin value to correct the scale
-    void setAxisScale (int axisId, double min, double max, double step)
+    void setAxisScale (int axisId, double min, double max, double step = 0)
     {
         double margin = (max-min)* m_marginPercentage;
         min = min - margin;
         max = max + margin;
-        QwtPlot::setAxisScale(axisId, min, max, step);
+        QBasePlotWidget::setAxisScale(axisId, min, max, step);
     }
 
 private:

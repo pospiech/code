@@ -16,6 +16,7 @@
 #include <qwt_scale_widget.h>
 #include <qwt_scale_draw.h>
 #include <qwt_plot_grid.h>
+#include <qwt_text_label.h>
 
 #include <QPrinter>
 #include <QPrintDialog>
@@ -75,7 +76,21 @@ public:
         QwtPlot::setFrameStyle(QFrame::NoFrame);
         QwtPlot::plotLayout()->setAlignCanvasToScales(true);
 
-        // set axis scale
+        // reduce giant font size to standard font size on title and labels
+        QFont font = QFont(fontInfo().family(), fontInfo().pointSize(), QFont::Normal);
+        this->titleLabel()->setFont(font);
+        this->axisWidget(QwtPlot::xTop)->setFont(font);
+        this->axisWidget(QwtPlot::xBottom)->setFont(font);
+        this->axisWidget(QwtPlot::yLeft)->setFont(font);
+        this->axisWidget(QwtPlot::yRight)->setFont(font);
+
+        QwtText text;
+        text.setFont(font);
+        this->setAxisTitle(QwtPlot::xBottom, text);
+        this->setAxisTitle(QwtPlot::xBottom,text);
+        this->setAxisTitle(QwtPlot::yLeft,text);
+        this->setAxisTitle(QwtPlot::yRight,text);
+
         QwtPlot::setAxisAutoScale(QwtPlot::xBottom);
         QwtPlot::setAxisAutoScale(QwtPlot::yLeft);
         QwtPlot::setAxisAutoScale(QwtPlot::yRight);
@@ -120,10 +135,70 @@ public:
             delete m_grid;
     }
 
+    //! overwrites `QwtPlot::setAxisScale`
+    //! applies scale to zoomer
+    void setAxisScale (int axisId, double min, double max, double step = 0)
+    {
+        QwtPlot::setAxisScale(axisId, min, max, step);
+        // autoscale must be set on both zoomer,
+        // because they do not know each other.
+        switch (static_cast<QwtPlot::Axis>(axisId))
+        {
+        case xBottom:
+            this->zoomerY1()->setAxisScale(QwtPlot::xBottom, min, max);
+            this->zoomerY2()->setAxisScale(QwtPlot::xBottom, min, max);
+            break;
+        case yLeft:
+            this->zoomerY1()->setAxisScale(QwtPlot::yLeft, min, max);
+            this->zoomerY2()->setAxisScale(QwtPlot::yLeft, min, max);
+            break;
+        case yRight:
+            this->zoomerY1()->setAxisScale(QwtPlot::yRight, min, max);
+            this->zoomerY2()->setAxisScale(QwtPlot::yRight, min, max);
+            break;
+        case xTop:
+            this->zoomerY1()->setAxisScale(QwtPlot::xTop, min, max);
+            this->zoomerY2()->setAxisScale(QwtPlot::xTop, min, max);
+            break;
+        case axisCnt: break;
+        }
+    }
+
+    //! overwrites `QwtPlot::setAxisAutoScale`
+    //! deletes scale to zoomer
+    void setAxisAutoScale( int axisId, bool on = true )
+    {
+        QwtPlot::setAxisAutoScale(axisId, on);
+        if (on) {
+            // autoscale must be reset on both zoomer,
+            // because they do not know each other.
+            switch (static_cast<QwtPlot::Axis>(axisId))
+            {
+            case xBottom:
+                this->zoomerY1()->setAxisAutoScale(QwtPlot::xBottom);
+                this->zoomerY2()->setAxisAutoScale(QwtPlot::xBottom);
+                break;
+            case yLeft:
+                this->zoomerY1()->setAxisAutoScale(QwtPlot::yLeft);
+                this->zoomerY2()->setAxisAutoScale(QwtPlot::yLeft);
+                break;
+            case yRight:
+                this->zoomerY1()->setAxisAutoScale(QwtPlot::yRight);
+                this->zoomerY2()->setAxisAutoScale(QwtPlot::yRight);
+                break;
+            case xTop:
+                this->zoomerY1()->setAxisAutoScale(QwtPlot::xTop);
+                this->zoomerY2()->setAxisAutoScale(QwtPlot::xTop);
+                break;
+            case axisCnt: break;
+            }
+        }
+    }
+
     //! Zoomer for Y1 axis
     //!
     //! \return pointer to QwtPlotZoomer
-    QwtPlotZoomer * zoomerY1() const
+    QPlotZoomer * zoomerY1() const
     {
         return m_zoomerY1;
     }
@@ -131,7 +206,7 @@ public:
     //! Zoomer for Y2 axis
     //!
     //! \return pointer to QwtPlotZoomer
-    QwtPlotZoomer * zoomerY2() const
+    QPlotZoomer * zoomerY2() const
     {
         return m_zoomerY2;
     }
@@ -187,8 +262,8 @@ public:
 
 
 private:
-    QwtPlotZoomer * m_zoomerY1;
-    QwtPlotZoomer * m_zoomerY2;
+    QPlotZoomer * m_zoomerY1;
+    QPlotZoomer * m_zoomerY2;
     QwtPlotGrid * m_grid;
     QwtPlotCanvas * m_canvas;
 };
