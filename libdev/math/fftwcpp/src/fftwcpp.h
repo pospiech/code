@@ -59,11 +59,11 @@ struct NumTraits<long double> : GenericNumTraits<long double> {};
 // specialize: std::complex = complex
 template<typename _Real>
 struct NumTraits<std::complex<_Real> >
-  : GenericNumTraits<std::complex<_Real> >
+        : GenericNumTraits<std::complex<_Real> >
 {
-  enum {
-    IsComplex = 1
-  };
+    enum {
+        IsComplex = 1
+    };
 };
 
 
@@ -113,7 +113,6 @@ struct NumTraits<std::complex<_Real> >
   */
 
 // FFTW: faster, GPL -- incompatible with Eigen in LGPL form, bigger code size
-#  include <fftw3.h>
 #  include "ei_fftw_impl.h"
 
 /*! define FFT implementation. Here fftw is the the only provided implementation */
@@ -134,7 +133,7 @@ class FFT
 {
 public:
     typedef T_Impl impl_type;
-    typedef int Index;
+    typedef int Index; // usage ??
     typedef typename impl_type::Scalar Scalar;
     typedef typename impl_type::Complex Complex;
 
@@ -330,8 +329,5 @@ private:
     impl_type m_impl;
     int m_flag;
 };
-
-
-
 
 #endif

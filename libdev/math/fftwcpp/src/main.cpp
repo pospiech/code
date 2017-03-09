@@ -14,7 +14,6 @@
 using namespace std;
 #include <vector>
 
-using namespace std;
 using namespace fftwcpp;
 
 int main(int argc, char*argv[])

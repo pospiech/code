@@ -10,10 +10,6 @@
 #include <cstdint>
 using namespace std;
 
-namespace Eigen { 
-
-namespace internal {
-
 // FFTW uses non-const arguments
 // so we must use ugly const_cast calls for all the args it uses
 //
@@ -46,6 +42,10 @@ fftwl_complex * fftw_cast( const std::complex<long double> * p)
 {
     return const_cast<fftwl_complex*>( reinterpret_cast<const fftwl_complex*>(p) );
 }
+
+namespace Eigen {
+
+namespace internal {
 
 template <typename T>
 struct fftw_plan {};

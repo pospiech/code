@@ -2,5 +2,5 @@ include( config.pri )
 
 TEMPLATE = subdirs
 
-SUBDIRS = src
+SUBDIRS = examples
 CONFIG += ordered recursive
