@@ -64,7 +64,8 @@ LIBS += -L$${PROJECT_ROOT}/lib/fftw/double/ -llibfftw3-3
 
 SOURCES += main.cpp \		
     gui/mainwindow.cpp \
-    calculationmanager.cpp
+    calculationmanager.cpp \
+    gui/plotcomplexdata.cpp
 
 HEADERS += gui/mainwindow.h \
     calculationmanager.h \
@@ -73,7 +74,8 @@ HEADERS += gui/mainwindow.h \
     functions/functionfactory.h \
     gui/layouts.h \
     math/sgn.h \
-    math/phaseunwrap.h
+    math/phaseunwrap.h \
+    gui/plotcomplexdata.h
 
 # add header files for moc
 HEADERS += ../../../../plot/plottools/trunk/src/qbaseplotwidget.h \
@@ -90,5 +92,6 @@ HEADERS += ../../../../plot/plottools/trunk/src/qbaseplotwidget.h \
 #    plottools/qplotcurve.h \
 #    plottools/qplotzoomer.h \
 
-FORMS 	+= gui/mainwindow.ui
+FORMS 	+= gui/mainwindow.ui \
+    gui/plotcomplexdata.ui
 
