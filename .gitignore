@@ -52,3 +52,7 @@ Makefile.Release
 /libdev/qt/qtwidgets/QScienceSpinbox/examples/bin
 /libdev/qt/qtwidgets/QScienceSpinbox/lib
 *.user
+/libdev/math/fftwcpp/examples/bin
+/libdev/math/fftwcpp/examples/bin_debug
+/libdev/math/fftwcpp/examples/build
+/libdev/math/fftwcpp/examples/demo/*.stash

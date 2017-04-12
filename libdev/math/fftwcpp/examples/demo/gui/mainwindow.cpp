@@ -25,7 +25,7 @@ using std::complex;
 using namespace fftwcpp;
 
 #include "phaseunwrap.h"
-#include "plottools.h"
+#include "plotcomplexdata.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -83,7 +83,8 @@ void MainWindow::setupWidgets()
     for (size_t i = 0; i < 4; ++i) {
         this->plotList.append(new QLinePlot(this));
     }
-    ui->gridLayoutPlots->addWidget(plotList[0], 1, 1);
+//    ui->gridLayoutPlots->addWidget(plotList[0], 1, 1);
+    ui->gridLayoutPlots->addWidget(new PlotComplexData(this), 1, 1);
     ui->gridLayoutPlots->addWidget(plotList[1], 1, 2);
     ui->gridLayoutPlots->addWidget(plotList[2], 2, 1);
     ui->gridLayoutPlots->addWidget(plotList[3], 2, 2);
@@ -196,47 +197,47 @@ void MainWindow::updatePlotData(QwtPlot *plot, const std::vector<complex<double>
 
 
 
-void MainWindow::updatePlotData(QwtPlot *plot, vector<double> & dataAmplitude, vector<double> & dataPhase )
-{
-    vector<double> x(dataAmplitude.size());
+//void MainWindow::updatePlotData(QwtPlot *plot, vector<double> & dataAmplitude, vector<double> & dataPhase )
+//{
+//    vector<double> x(dataAmplitude.size());
 
-    int halfsize = int(dataAmplitude.size()/2);
-    // if phase values should be unwrapped wrap them
-    // by 2 pi to fit into complex values.
-    for (size_t i=0; i < dataPhase.size(); ++i)
-    {
-        x[i] = int(i) - halfsize;
-        dataPhase[i] = fmod(dataPhase[i], pi*1.00001);
-    }
-    // remove phase flipping in ifft data if selected
-    if (ui->checkBoxPhaseUnwrap->checkState() == Qt::Checked) {
-        if (plot->property("type").toString() == "ifft")
-        {
-            removePhaseFlipping(dataPhase);
-        }
-    }
-    // currently only 1D plots are supported
-    QLinePlot * plot1D = dynamic_cast<QLinePlot*>(plot);
-    if (!plot1D)
-        return;
+//    int halfsize = int(dataAmplitude.size()/2);
+//    // if phase values should be unwrapped wrap them
+//    // by 2 pi to fit into complex values.
+//    for (size_t i=0; i < dataPhase.size(); ++i)
+//    {
+//        x[i] = int(i) - halfsize;
+//        dataPhase[i] = fmod(dataPhase[i], pi*1.00001);
+//    }
+//    // remove phase flipping in ifft data if selected
+//    if (ui->checkBoxPhaseUnwrap->checkState() == Qt::Checked) {
+//        if (plot->property("type").toString() == "ifft")
+//        {
+//            removePhaseFlipping(dataPhase);
+//        }
+//    }
+//    // currently only 1D plots are supported
+//    QLinePlot * plot1D = dynamic_cast<QLinePlot*>(plot);
+//    if (!plot1D)
+//        return;
 
-    // pass data points to graphs:
-    plot1D->curve(0)->setData(x, dataPhase);
-    plot1D->curve(1)->setData(x, dataAmplitude);
+//    // pass data points to graphs:
+//    plot1D->curve(0)->setData(x, dataPhase);
+//    plot1D->curve(1)->setData(x, dataAmplitude);
 
-    // manual scale: for amplitude (Phase is fixed anyway)
-    double minValue = *std::min_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-    double maxValue = *std::max_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-    minValue = std::min(0.0, minValue);
+//    // manual scale: for amplitude (Phase is fixed anyway)
+//    double minValue = *std::min_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
+//    double maxValue = *std::max_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
+//    minValue = std::min(0.0, minValue);
 
-    if (minValue == maxValue)
-    {
-        maxValue = minValue + 1;
-    }
+//    if (minValue == maxValue)
+//    {
+//        maxValue = minValue + 1;
+//    }
 
-    plot1D->setAxisScale(QwtPlot::yLeft,minValue,maxValue * 1.2);
-    plot1D->replot();
-}
+//    plot1D->setAxisScale(QwtPlot::yLeft,minValue,maxValue * 1.2);
+//    plot1D->replot();
+//}
 
 void MainWindow::on_actionQuit_triggered()
 {
