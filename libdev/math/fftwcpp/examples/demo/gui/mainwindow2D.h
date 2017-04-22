@@ -22,6 +22,7 @@ class MainWindow;
 class QBoxLayout;
 class QVBoxLayout;
 class QButtonGroup;
+class PlotComplexData;
 
 enum ComplexType{Amplitude, Phase };
 
@@ -54,8 +55,8 @@ private slots:
 
 private:
     void setupPlot(QLinePlot *plot, QString title);
-    void updatePlotData(QwtPlot *plot, const std::vector<complex<double>, fftalloc<complex<double> > > &data);
-    void updatePlotData(QwtPlot *plot, vector<double> & dataAmplitude, vector<double> & dataPhase );
+//    void updatePlotData(QwtPlot *plot, const std::vector<complex<double>, fftalloc<complex<double> > > &data);
+//    void updatePlotData(QwtPlot *plot, vector<double> & dataAmplitude, vector<double> & dataPhase );
     void setupWidgets();
     void addFunctionParameter(ComplexType type, QBoxLayout * layout, QString valueName, double value, double min, double max);
     void createFunctionParameterList(ComplexType type, int index);
@@ -73,7 +74,7 @@ private:
     QMap<QString, QWidget*> mapAmplitudeParameterWidgets;
     QButtonGroup * buttonGroupFFTDimension;
 
-    QVector<QLinePlot*> plotList;
+    QVector<PlotComplexData*> plotWidgetList;
     FFT<double> fft;
 public:
 

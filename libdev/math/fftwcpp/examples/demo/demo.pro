@@ -21,8 +21,13 @@ DEFINES += QWT_DLL
 # C:\Users\matthias\Documents\svn\CPP\libdev\math\eigen_fft\fftwcpp\examples\demo
 # C:\Users\matthias\Documents\svn\CPP\libs\qwt-6.1.3
 
-QWT_PATH = C:/Users/matthias/Documents/svn/CPP/libs/qwt-6.1.3
-#$${PWD}/../../../../../libs/qwt-6.1.3
+message($${PWD})
+# D:/Git/code/libdev/math/fftwcpp/examples/demo
+# D:/Git/code/../../../../..
+# D:\Git\code\libs\qwt-6.1.3\src
+
+# QWT_PATH = C:/Users/matthias/Documents/svn/CPP/libs/qwt-6.1.3
+QWT_PATH = $${PWD}/../../../../../libs/qwt-6.1.3
 
 
 win32 {
@@ -40,7 +45,13 @@ INCLUDEPATH += $${QWT_PATH}/src
 #C:\Git\code\libdev\math\fftwcpp\examples\demo\plottools
 # INCLUDEPATH += $${EXAMPLES_ROOT}../../../plot/plottools/trunk/src
 
-INCLUDEPATH += C:/Git/code/libdev/plot/plottools/trunk/src
+# D:/Git/code/libdev/math/fftwcpp/examples/demo
+# D:/Git/code/libdev/../../../..
+# D:\Git\code\libdev\plot\plottools\trunk\src
+
+INCLUDEPATH += $${PWD}/../../../../plot/plottools/trunk/src
+
+# INCLUDEPATH += C:/Git/code/libdev/plot/plottools/trunk/src
 
 # #####################################################################
 # Includes
@@ -63,11 +74,11 @@ LIBS += -L$${PROJECT_ROOT}/lib/fftw/double/ -llibfftw3-3
 
 
 SOURCES += main.cpp \		
-    gui/mainwindow.cpp \
+    gui/mainwindow2D.cpp \
     calculationmanager.cpp \
     gui/plotcomplexdata.cpp
 
-HEADERS += gui/mainwindow.h \
+HEADERS += gui/mainwindow2D.h \
     calculationmanager.h \
     functions/examplefunctions.h \
     functions/complexfunctionfactory.h \
@@ -92,6 +103,6 @@ HEADERS += ../../../../plot/plottools/trunk/src/qbaseplotwidget.h \
 #    plottools/qplotcurve.h \
 #    plottools/qplotzoomer.h \
 
-FORMS 	+= gui/mainwindow.ui \
+FORMS 	+= gui/mainwindow2D.ui \
     gui/plotcomplexdata.ui
 

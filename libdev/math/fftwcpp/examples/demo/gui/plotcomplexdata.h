@@ -35,11 +35,14 @@ public:
         twoDim = 2  // 2D
     };
 
+    void setTitle(QString title);
     void setData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, size_t sizeY /* = 0 */);
+    void updatePlotData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, size_t sizeY);
+    void updatePlotData(vector<double> & dataAmplitude, vector<double> & dataPhase , size_t sizeY);
 
 private:
     void createPlotWidgets(PlotComplexData::Dimension dimension);
-    void updatePlotData(vector<double> & dataAmplitude, vector<double> & dataPhase );
+    void setupPlot();
 
 
 protected:

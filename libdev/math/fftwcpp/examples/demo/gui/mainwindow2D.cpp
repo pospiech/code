@@ -1,5 +1,5 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "mainwindow2D.h"
+#include "ui_mainwindow2D.h"
 
 #include <QDoubleSpinBox>
 
@@ -24,7 +24,6 @@ using std::complex;
 #include "fftallocator.h"
 using namespace fftwcpp;
 
-#include "phaseunwrap.h"
 #include "plotcomplexdata.h"
 
 #include "plottools.h"
@@ -83,27 +82,41 @@ void MainWindow::setupWidgets()
     ui->comboBoxDataPoints->addItem("4096", 4096);
     ui->comboBoxDataPoints->addItem("16384", 16384);
 
-    for (size_t i = 0; i < 4; ++i) {
-        this->plotList.append(new QLinePlot(this));
-    }
+//    for (size_t i = 0; i < 4; ++i) {
+//        this->plotList.append(new QLinePlot(this));
+//    }
 //    ui->gridLayoutPlots->addWidget(plotList[0], 1, 1);
-//    ui->gridLayoutPlots->addWidget(new PlotComplexData(this), 1, 1);
-    ui->gridLayoutPlots->addWidget(plotList[0], 1, 1);
-    ui->gridLayoutPlots->addWidget(plotList[1], 1, 2);
-    ui->gridLayoutPlots->addWidget(plotList[2], 2, 1);
-    ui->gridLayoutPlots->addWidget(plotList[3], 2, 2);
+//    ui->gridLayoutPlots->addWidget(plotList[1], 1, 2);
+//    ui->gridLayoutPlots->addWidget(plotList[2], 2, 1);
+//    ui->gridLayoutPlots->addWidget(plotList[3], 2, 2);
+//    // make plot classed identifiable
+//    plotList[0]->setProperty("type", "data");
+//    plotList[1]->setProperty("type", "fft");
+//    plotList[2]->setProperty("type", "ifft");
+//    plotList[3]->setProperty("type", "compare");
+//    // configure their apperience
+//    setupPlot(plotList[0], "Original Data");
+//    setupPlot(plotList[1], "Fourier Transform");
+//    setupPlot(plotList[2], "Invers Fourier Transform of Fourier Data");
+//    setupPlot(plotList[3], "Difference to Original Data");
 
-    // make plot classed identifiable
-    plotList[0]->setProperty("type", "data");
-    plotList[1]->setProperty("type", "fft");
-    plotList[2]->setProperty("type", "ifft");
-    plotList[3]->setProperty("type", "compare");
-
-    // configure their apperience
-    setupPlot(plotList[0], "Original Data");
-    setupPlot(plotList[1], "Fourier Transform");
-    setupPlot(plotList[2], "Invers Fourier Transform of Fourier Data");
-    setupPlot(plotList[3], "Difference to Original Data");
+    for (size_t i = 0; i < 4; ++i) {
+        this->plotWidgetList.append(new PlotComplexData(this));
+    }
+    // add widgets to layout
+    ui->gridLayoutPlots->addWidget(plotWidgetList[0], 1, 1);
+    ui->gridLayoutPlots->addWidget(plotWidgetList[1], 1, 2);
+    ui->gridLayoutPlots->addWidget(plotWidgetList[2], 2, 1);
+    ui->gridLayoutPlots->addWidget(plotWidgetList[3], 2, 2);
+    // make plot widgets identifiable
+    plotWidgetList[0]->setProperty("type", "data");
+    plotWidgetList[1]->setProperty("type", "fft");
+    plotWidgetList[2]->setProperty("type", "ifft");
+    plotWidgetList[3]->setProperty("type", "compare");
+    plotWidgetList[0]->setTitle("Original Data");
+    plotWidgetList[1]->setTitle("Fourier Transform");
+    plotWidgetList[2]->setTitle("Invers Fourier Transform of Fourier Data");
+    plotWidgetList[3]->setTitle("Difference to Original Data");
 
     // init data
     ui->comboBoxFunctionsAmplitude->setCurrentIndex(3);
@@ -131,116 +144,6 @@ void MainWindow::setupWidgets()
 void MainWindow::on_buttonGroupFFTDimension_buttonClicked(int id)
 {
 
-}
-
-void MainWindow::setupPlot(QLinePlot *plot, QString title)
-{
-    // remove all previous plotitems
-    plot->clear();
-
-    plot->setTitle( title );
-    plot->setBoundingMarginPercent(10);
-
-    // legend
-//    QwtLegend *legend = new QwtLegend;
-//    plot->insertLegend( legend, QwtPlot::BottomLegend );
-
-    plot->enableAxis(QwtPlot::yRight);
-
-    plot->setAxisTitle (QwtPlot::xBottom, "x / Data Points");
-    plot->setAxisTitle (QwtPlot::yLeft, "amplitude");
-    plot->setAxisTitle (QwtPlot::yRight, "phase (-pi..pi)");
-
-    // Zoom
-    plot->zoomerY2()->setEnabled(true);
-
-    // Grid
-    plot->grid()->enableX(true);
-    plot->grid()->enableY(true);
-
-    plot->clear();
-
-    QPlotCurve *curve1 = new QPlotCurve();
-    curve1->setTitle( "phase" );
-    curve1->setPen( QColorPalette::color(1), 1 ),
-    curve1->setYAxis(QwtPlot::yRight);
-    // fix scale for Y2 axis
-    plot->setAxisScale(QwtPlot::yRight, -pi, pi);
-
-    QPlotCurve *curve2 = new QPlotCurve();
-    curve2->setTitle( "amplitude" );
-    curve2->setPen( QColorPalette::color(2), 1 ),
-    curve2->setYAxis(QwtPlot::yLeft);
-
-    // attach Curve to qwtPlot    
-    curve1->attach( plot );
-    curve2->attach( plot );
-    plot->replot();
-
-    // curves must be attached to plot, otherwise
-    // nothing is applied.
-    plot->setColorPalette(QColorPalette::MSOffice2007);
-
-}
-
-
-void MainWindow::updatePlotData(QwtPlot *plot, const std::vector<complex<double>,fftalloc<complex<double> > > & data)
-{
-    size_t N = data.size();
-    vector<double> dataAmplitude(N);
-    vector<double> dataPhase(N);
-
-    for(std::vector<complex<double> >::size_type i = 0; i != data.size(); i++) {
-        dataAmplitude[i] = abs(data[i]);
-        dataPhase[i]     = arg(data[i]);
-    }
-
-    updatePlotData(plot, dataAmplitude, dataPhase);
-
-}
-
-
-
-void MainWindow::updatePlotData(QwtPlot *plot, vector<double> & dataAmplitude, vector<double> & dataPhase )
-{
-    vector<double> x(dataAmplitude.size());
-
-    int halfsize = int(dataAmplitude.size()/2);
-    // if phase values should be unwrapped wrap them
-    // by 2 pi to fit into complex values.
-    for (size_t i=0; i < dataPhase.size(); ++i)
-    {
-        x[i] = int(i) - halfsize;
-        dataPhase[i] = fmod(dataPhase[i], pi*1.00001);
-    }
-    // remove phase flipping in ifft data if selected
-    if (ui->checkBoxPhaseUnwrap->checkState() == Qt::Checked) {
-        if (plot->property("type").toString() == "ifft")
-        {
-            removePhaseFlipping(dataPhase);
-        }
-    }
-    // currently only 1D plots are supported
-    QLinePlot * plot1D = dynamic_cast<QLinePlot*>(plot);
-    if (!plot1D)
-        return;
-
-    // pass data points to graphs:
-    plot1D->curve(0)->setData(x, dataPhase);
-    plot1D->curve(1)->setData(x, dataAmplitude);
-
-    // manual scale: for amplitude (Phase is fixed anyway)
-    double minValue = *std::min_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-    double maxValue = *std::max_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-    minValue = std::min(0.0, minValue);
-
-    if (minValue == maxValue)
-    {
-        maxValue = minValue + 1;
-    }
-
-    plot1D->setAxisScale(QwtPlot::yLeft,minValue,maxValue * 1.2);
-    plot1D->replot();
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -418,27 +321,26 @@ void MainWindow::getResultsAndPlot()
          doShift = static_cast<fftAction>(calculationManager->shiftBeforeFFT());
     }
 
-    updatePlotData(plotList[0], calculationManager->data(doShift) );
-    updatePlotData(plotList[1], calculationManager->dataFwdFourier(doShift) );
-    updatePlotData(plotList[2], calculationManager->dataInvFourier(doShift) );
+    plotWidgetList[0]->updatePlotData(calculationManager->data(doShift) );
+    plotWidgetList[1]->updatePlotData(calculationManager->dataFwdFourier(doShift) );
+    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift) );
 
 
-
+    // store original and invers data for explicit comparision
     const std::vector<complex<double>,fftalloc<complex<double> > > inv = calculationManager->dataInvFourier(doShift);
     const std::vector<complex<double>,fftalloc<complex<double> > > orig = calculationManager->data(doShift);
 
     size_t N = orig.size();
     vector<double> dataAmplitude(N);
     vector<double> dataPhase(N);
-
+    // convert to amplitude and phase before comparison
     for(std::vector<double>::size_type i = 0; i != N; i++) {
         dataAmplitude[i] = abs(inv[i]) - abs(orig[i]);
         dataPhase[i]     = arg(inv[i]) - arg(orig[i]);
     }
 
-    updatePlotData(plotList[3], dataAmplitude, dataPhase);
+    plotWidgetList[3]->updatePlotData(dataAmplitude, dataPhase);
 
-//    updatePlotData(plotList[3], calculationManager->dataCompare(doShift) );
 }
 
 void MainWindow::on_checkBoxPhaseShift_stateChanged(int state)
@@ -461,7 +363,7 @@ void MainWindow::on_checkBoxPhaseUnwrap_stateChanged(int state)
     Q_UNUSED(state);
     // update plot only
     fftAction doShift = static_cast<fftAction>(calculationManager->shiftBeforeFFT());
-    updatePlotData(plotList[2], calculationManager->dataInvFourier(doShift) );
+    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift) );
 }
 
 void MainWindow::on_pushButtonStartFFT_clicked()
