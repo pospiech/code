@@ -268,4 +268,6 @@ private:
     QwtPlotCanvas * m_canvas;
 };
 
+
+
 #endif // QBASEPLOTWIDGET_H

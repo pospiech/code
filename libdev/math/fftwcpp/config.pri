@@ -49,6 +49,6 @@ PROJECT_OUT_ROOT = $${OUT_PWD}/..
 # If FFTWCppDll is enabled, a shared library is built, otherwise
 # it will be a static library.
 ######################################################################
-
-BUILD_CONFIG           += FFTWCppDll
+# currently no dll is planed, fftwcpp is a template header project
+# BUILD_CONFIG           += FFTWCppDll
 

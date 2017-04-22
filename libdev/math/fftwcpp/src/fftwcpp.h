@@ -59,27 +59,44 @@ struct NumTraits<long double> : GenericNumTraits<long double> {};
 // specialize: std::complex = complex
 template<typename _Real>
 struct NumTraits<std::complex<_Real> >
-  : GenericNumTraits<std::complex<_Real> >
+        : GenericNumTraits<std::complex<_Real> >
 {
-  enum {
-    IsComplex = 1
-  };
+    enum {
+        IsComplex = 1
+    };
 };
 
 
 /**
-  * \defgroup FFT_Module Fast Fourier Transform module
+  * \class FFT
   *
   * \code
-  * #include <unsupported/Eigen/FFT>
+  * #include "fftwcpp.h"
+  *
+  * #include "fftallocator.h"
+  * using namespace fftwcpp;
+  *
+  * // create FFT class implementation
+  * // each implementation has its own plan map.
+  * FFT<double> fft;
+  *
+  * // data vectors
+  * vector<complex<double>,fftalloc<complex<double> > > dataOriginal; //! Orignal Data
+  * vector<complex<double>,fftalloc<complex<double> > > dataFwdFourier;  //! Fourier Transformed Data
+  * vector<complex<double>,fftalloc<complex<double> > > dataInvFourier; //! Invers Fourier Calculated Data
+  *
+  * // create data in vector containers ...
+  *
+  * fft.fwd(dataFwdFourier, dataOriginal);
+  * fft.inv(dataInvFourier, dataFwdFourier);
   * \endcode
   *
-  * This module provides Fast Fourier transformation, with a FFTW backend
-  * implementation.
+  * This class provides Fast Fourier transformation, with a FFTW backend
+  * implementation. The code is a modified version of Eigen/FFT
   *
   * - fftw (http://www.fftw.org) : faster, GPL -- incompatible with Eigen in LGPL form, bigger code size.
   *
-  * \section FFTDesign Design
+  * \section FFT Design
   *
   * The following design decisions were made concerning scaling and
   * half-spectrum for real FFT.
@@ -113,17 +130,19 @@ struct NumTraits<std::complex<_Real> >
   */
 
 // FFTW: faster, GPL -- incompatible with Eigen in LGPL form, bigger code size
-#  include <fftw3.h>
-#  include "ei_fftw_impl.h"
+#include "ei_fftw_impl.h"
 
 /*! define FFT implementation. Here fftw is the the only provided implementation */
 //template <typename T> typedef struct internal::fftw_impl  default_fft_impl; this does not work
 template <typename T> struct default_fft_impl : public Eigen::internal::fftw_impl<T> {};
 
 /*! Define fft_vector type
- *  This is a shortcut for
- *  \code vector<complex<double>,fftalloc<complex<double> > >
- *  \example fft_vector<complex<double> >
+ *  This is a shortcut, use
+ *  \code
+ *  fft_vector<complex<double> >
+ *  // instead of
+ *  vector<complex<double>,fftalloc<complex<double> > >
+ *  \endcode
 */
 template <typename T> using fft_vector = std::vector<T, fftalloc<T>>;
 
@@ -134,10 +153,11 @@ class FFT
 {
 public:
     typedef T_Impl impl_type;
-    typedef int Index;
+    typedef int Index; // usage ??
     typedef typename impl_type::Scalar Scalar;
     typedef typename impl_type::Complex Complex;
 
+    /*! flags for automatic applied functions */
     enum Flag {
         Default=0, // goof proof
         Unscaled=1,
@@ -145,16 +165,19 @@ public:
         // SomeOtherSpeedOptimization=4
         Speedy=32767
     };
-    /* copy constructor */
+    /*! copy constructor */
     FFT( const impl_type & impl=impl_type(), Flag flags=Default )
         : m_impl(impl), m_flag(flags) { }
 
+    /*! check if flag is set */
     inline
     bool HasFlag(Flag f) const { return (m_flag & (int)f) == f;}
 
+    /*! set flag */
     inline
     void SetFlag(Flag f) { m_flag |= (int)f;}
 
+    /*! remove flag */
     inline
     void ClearFlag(Flag f) { m_flag &= (~(int)f);}
 
@@ -284,6 +307,7 @@ public:
 
 private:
 
+    /*! scale array by scale s */
     template <typename T_Data>
     inline
     void scale(T_Data * x,Scalar s,Index nx)
@@ -292,10 +316,10 @@ private:
             *x++ *= s;
     }
 
+    /*! create the implicit right-half spectrum (conjugate-mirror of the left-half) */
     inline
     void ReflectSpectrum(Complex * freq, Index nfft)
     {
-        // create the implicit right-half spectrum (conjugate-mirror of the left-half)
         Index nhbins=(nfft>>1)+1;
         for (Index k=nhbins;k < nfft; ++k )
             freq[k] = conj(freq[nfft-k]);
@@ -330,8 +354,5 @@ private:
     impl_type m_impl;
     int m_flag;
 };
-
-
-
 
 #endif

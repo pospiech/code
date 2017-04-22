@@ -20,6 +20,8 @@
 #include <algorithm> // std::rotate
 #include <iostream>
 
+#include "fftallocator.h" // fftwcpp::fftalloc
+
 using std::vector;
 using std::complex;
 
@@ -58,7 +60,23 @@ void ifftshift(complex<_Real> * complexArray, const size_t count)
     // std::rotate(complexVector.begin(),complexVector.begin()+center,complexVector.end());
 }
 
-/*! \sa fftshift(complex<_Real> & complexArray,const size_t count) */
+/*! \sa fftshift(complex<_Real> * complexArray, const size_t count) */
+template <typename _Real>
+static inline
+void fftshift(vector<complex<_Real>,fftwcpp::fftalloc<complex<_Real> > > & data)
+{
+    fftshift(&data[0], data.size());
+}
+
+/*! \sa ifftshift(complex<_Real> * complexArray, const size_t count) */
+template <typename _Real>
+static inline
+void ifftshift(vector<complex<_Real>,fftwcpp::fftalloc<complex<_Real> > > & data)
+{
+    ifftshift(&data[0], data.size());
+}
+
+/*! \sa fftshift(complex<_Real> * complexArray,const size_t count) */
 template <typename _Real>
 static inline
 void fftshift(vector<complex<_Real> > & data)
@@ -66,7 +84,7 @@ void fftshift(vector<complex<_Real> > & data)
     fftshift(&data[0], data.size());
 }
 
-/*! \sa ifftshift(complex<_Real> & complexArray,const size_t count) */
+/*! \sa ifftshift(complex<_Real> * complexArray,const size_t count) */
 template <typename _Real>
 static inline
 void ifftshift(vector<complex<_Real> > & complexVector)
@@ -75,42 +93,42 @@ void ifftshift(vector<complex<_Real> > & complexVector)
 }
 
 
-/*! \sa fftshift(complex<_Real> & complexArray, const size_t count) */
+/*! \sa fftshift(complex<_Real> * complexArray, const size_t count) */
 static inline
 void fftshift(fftwf_complex * complexArray, size_t arraySize)
 {
     fftshift(reinterpret_cast<complex<float> *>(complexArray), arraySize);
 }
 
-/*! \sa fftshift(complex<_Real> & complexArray, const size_t count) */
+/*! \sa fftshift(complex<_Real> * complexArray, const size_t count) */
 static inline
 void fftshift(fftw_complex * complexArray, size_t arraySize)
 {
     fftshift(reinterpret_cast<complex<double> *>(complexArray), arraySize);
 }
 
-/*! \sa fftshift(complex<_Real> & complexArray, const size_t count) */
+/*! \sa fftshift(complex<_Real> * complexArray, const size_t count) */
 static inline
 void fftshift(fftwl_complex * complexArray, size_t arraySize)
 {
     fftshift(reinterpret_cast<complex<long double> *>(complexArray), arraySize);
 }
 
-/*! \sa ifftshift(complex<_Real> & complexArray, const size_t count) */
+/*! \sa ifftshift(complex<_Real> * complexArray, const size_t count) */
 static inline
 void  ifftshift(fftwf_complex * complexArray, size_t arraySize)
 {
      ifftshift(reinterpret_cast<complex<float> *>(complexArray), arraySize);
 }
 
-/*! \sa  ifftshift(complex<_Real> & complexArray, const size_t count) */
+/*! \sa  ifftshift(complex<_Real> * complexArray, const size_t count) */
 static inline
 void  ifftshift(fftw_complex * complexArray, size_t arraySize)
 {
      ifftshift(reinterpret_cast<complex<double> *>(complexArray), arraySize);
 }
 
-/*! \sa  ifftshift(complex<_Real> & complexArray, const size_t count) */
+/*! \sa  ifftshift(complex<_Real> * complexArray, const size_t count) */
 static inline
 void  ifftshift(fftwl_complex * complexArray, size_t arraySize)
 {
@@ -222,7 +240,24 @@ void ifftshift(complex<_Real> *data, size_t xdim, size_t ydim)
     }
 }
 
-/*! \sa fftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa fftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
+template <typename _Real>
+static inline
+void fftshift(vector<complex<_Real>,fftwcpp::fftalloc<complex<_Real> > > & data, size_t xdim, size_t ydim)
+{
+    fftshift(&data[0], xdim, ydim);
+}
+
+/*! \sa ifftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
+template <typename _Real>
+static inline
+void ifftshift(vector<complex<_Real>,fftwcpp::fftalloc<complex<_Real> > > & data, size_t xdim, size_t ydim)
+{
+    ifftshift(&data[0], xdim, ydim);
+}
+
+
+/*! \sa fftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 template <typename _Real>
 static inline
 void fftshift(vector<complex<_Real> > & data, size_t xdim, size_t ydim)
@@ -230,7 +265,7 @@ void fftshift(vector<complex<_Real> > & data, size_t xdim, size_t ydim)
     fftshift(&data[0], xdim, ydim);
 }
 
-/*! \sa ifftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa ifftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 template <typename _Real>
 static inline
 void ifftshift(vector<complex<_Real> > & data, size_t xdim, size_t ydim)
@@ -239,42 +274,42 @@ void ifftshift(vector<complex<_Real> > & data, size_t xdim, size_t ydim)
 }
 
 
-/*! \sa fftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa fftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 static inline
 void fftshift(fftwf_complex * complexArray, size_t xdim, size_t ydim)
 {
     fftshift(reinterpret_cast<complex<float> *>(complexArray), xdim, ydim);
 }
 
-/*! \sa fftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa fftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 static inline
 void fftshift(fftw_complex * complexArray, size_t xdim, size_t ydim)
 {
     fftshift(reinterpret_cast<complex<double> *>(complexArray), xdim, ydim);
 }
 
-/*! \sa fftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa fftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 static inline
 void fftshift(fftwl_complex * complexArray, size_t xdim, size_t ydim)
 {
     fftshift(reinterpret_cast<complex<long double> *>(complexArray), xdim, ydim);
 }
 
-/*! \sa ifftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa ifftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 static inline
 void  ifftshift(fftwf_complex * complexArray, size_t xdim, size_t ydim)
 {
      ifftshift(reinterpret_cast<complex<float> *>(complexArray), xdim, ydim);
 }
 
-/*! \sa  ifftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa  ifftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 static inline
 void  ifftshift(fftw_complex * complexArray, size_t xdim, size_t ydim)
 {
      ifftshift(reinterpret_cast<complex<double> *>(complexArray), xdim, ydim);
 }
 
-/*! \sa  ifftshift(complex<_Real> & complexArray, size_t xdim, size_t ydim) */
+/*! \sa  ifftshift(complex<_Real> * complexArray, size_t xdim, size_t ydim) */
 static inline
 void  ifftshift(fftwl_complex * complexArray, size_t xdim, size_t ydim)
 {
@@ -298,9 +333,9 @@ void  printArray2D(complex<_Real> * Array, const size_t Nx, const size_t Ny)
     for (size_t y = 0; y < Ny; y++) {
         for (size_t x = 0; x < Nx; x++) {
             size_t index = arrayIndex(x, y, Nx);
-            cout << " c:(" << Array[index].real() << "," << Array[index].imag() << ")  ";
+            std::cout << " c:(" << Array[index].real() << "," << Array[index].imag() << ")  ";
         }
-        cout << std::endl;
+        std::cout << std::endl;
     }
 }
 
