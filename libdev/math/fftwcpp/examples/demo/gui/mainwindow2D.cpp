@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(calculationManager.data(), SIGNAL (finished()), this, SLOT (getResultsAndPlot()));
     connect(calculationManager.data(), SIGNAL (iteration(int)), this, SLOT (updateProgressBar(int)));
 
+    connect(calculationManager.data(), SIGNAL (dimensionsChanged(size_t)), this, SLOT (onDimensionsChanged(size_t)));
 }
 
 MainWindow::~MainWindow()
@@ -131,19 +132,16 @@ void MainWindow::setupWidgets()
     connect(buttonGroupFFTDimension, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
             this, &MainWindow::on_buttonGroupFFTDimension_buttonClicked);
 
-//    QButtonGroup::buttonClicked(int id)
-//    connect(buttonGroup, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
-//            [=](int id){
-//        qDebug() << "button ID: " << id ;
-//    });
 
-    on_pushButtonStartFFT_clicked();
+//    on_pushButtonStartFFT_clicked();
 
 }
 
+
+
 void MainWindow::on_buttonGroupFFTDimension_buttonClicked(int id)
 {
-
+    this->calculationManager->setDimensions(id);
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -321,9 +319,9 @@ void MainWindow::getResultsAndPlot()
          doShift = static_cast<fftAction>(calculationManager->shiftBeforeFFT());
     }
 
-    plotWidgetList[0]->updatePlotData(calculationManager->data(doShift) );
-    plotWidgetList[1]->updatePlotData(calculationManager->dataFwdFourier(doShift) );
-    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift) );
+    plotWidgetList[0]->updatePlotData(calculationManager->data(doShift), calculationManager->size().height());
+    plotWidgetList[1]->updatePlotData(calculationManager->dataFwdFourier(doShift), calculationManager->size().height());
+    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift), calculationManager->size().height());
 
 
     // store original and invers data for explicit comparision
@@ -339,7 +337,7 @@ void MainWindow::getResultsAndPlot()
         dataPhase[i]     = arg(inv[i]) - arg(orig[i]);
     }
 
-    plotWidgetList[3]->updatePlotData(dataAmplitude, dataPhase);
+    plotWidgetList[3]->updatePlotData(dataAmplitude, dataPhase, calculationManager->size().height());
 
 }
 
@@ -363,7 +361,7 @@ void MainWindow::on_checkBoxPhaseUnwrap_stateChanged(int state)
     Q_UNUSED(state);
     // update plot only
     fftAction doShift = static_cast<fftAction>(calculationManager->shiftBeforeFFT());
-    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift) );
+    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift), calculationManager->size().height());
 }
 
 void MainWindow::on_pushButtonStartFFT_clicked()
@@ -411,4 +409,20 @@ void MainWindow::on_comboBoxDataPoints_currentIndexChanged(int index)
 void MainWindow::updateProgressBar(int percent)
 {
     ui->progressBar->setValue(percent);
+}
+
+void MainWindow::onDimensionsChanged(size_t N)
+{
+    for (int i = 0; i < ui->comboBoxDataPoints->count(); ++i) {
+        if (N == 1) {
+            // text is "64 x 64" shall be "64"
+            QString text = ui->comboBoxDataPoints->itemText(i);
+            ui->comboBoxDataPoints->setItemText(i,text.split("x").first());
+        }
+        else {
+            // text is "64" shall be "64 x 64"
+            QString text = ui->comboBoxDataPoints->itemText(i);
+            ui->comboBoxDataPoints->setItemText(i,text + " x " + text);
+        }
+    }
 }

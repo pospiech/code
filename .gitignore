@@ -56,3 +56,9 @@ Makefile.Release
 /libdev/math/fftwcpp/examples/bin_debug
 /libdev/math/fftwcpp/examples/build
 /libdev/math/fftwcpp/examples/demo/*.stash
+/libdev/math/fftwcpp/doc/latex
+/libdev/math/fftwcpp/doc/html
+/libdev/math/fftwcpp/examples/demo/object_script.QFFTDemo.Release
+/libdev/math/fftwcpp/examples/demo/object_script.QFFTDemod.Debug
+/libdev/math/fftwcpp/fftwcpp.pro.user.24fec32
+/libdev/math/build-fftwcpp-Desktop_Qt_5_7_0_MinGW_32bit-Debug

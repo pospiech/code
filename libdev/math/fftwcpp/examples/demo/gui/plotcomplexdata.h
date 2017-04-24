@@ -42,7 +42,7 @@ public:
 
 private:
     void createPlotWidgets(PlotComplexData::Dimension dimension);
-    void setupPlot();
+    void setupPlot1D();
 
 
 protected:

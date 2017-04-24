@@ -18,6 +18,7 @@ public:
     CalculationManagerPrivate(CalculationManager * parent)
         : q_ptr(parent)
         , speed(0)
+        , dimensions(1)
     {        
     }
     ~CalculationManagerPrivate()
@@ -33,9 +34,11 @@ public:
     // each implementation has its own plan map.
     FFT<double> fft;
     size_t N;
+    QSize matrixSize;
     bool doShiftBeforeFFT;
     size_t iterations;
     double speed;
+    size_t dimensions;
 
     // data vectors
     vector<complex<double>,fftalloc<complex<double> > > dataOriginal; //! Orignal Data
@@ -47,6 +50,10 @@ public:
         this->N = N;
         dataFwdFourier.resize(N);
         dataInvFourier.resize(N);
+        if (dimensions == 1)
+            matrixSize = QSize(N,0);
+        else
+            matrixSize = QSize(sqrt(N),sqrt(N));
     }
 
 };
@@ -85,6 +92,25 @@ void CalculationManager::setIterations(size_t N)
 {
     d_ptr->iterations = N;
 }
+
+void CalculationManager::setDimensions(size_t N)
+{
+    const size_t  oldN = d_ptr->dimensions;
+    d_ptr->dimensions = N;
+    if (N != oldN)
+        emit dimensionsChanged(N);
+}
+
+size_t CalculationManager::dimensions()
+{
+    return d_ptr->dimensions;
+}
+
+QSize CalculationManager::size()
+{
+    return d_ptr->matrixSize;
+}
+
 
 //! set original data
 //! \param data complex double vector

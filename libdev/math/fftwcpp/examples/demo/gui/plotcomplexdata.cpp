@@ -17,7 +17,7 @@ public:
     PlotComplexDataPrivate(PlotComplexData * baseClass)
         : q_ptr(baseClass)
     {
-
+        dimension = PlotComplexData::oneDim;
     }
     vector<double> dataAmplitude;
     vector<double> dataPhase;
@@ -42,6 +42,8 @@ PlotComplexData::PlotComplexData(QWidget *parent) :
     gridLayoutPlots = new QGridLayout(this);
     gridLayoutPlots->setObjectName(QStringLiteral("gridLayoutPlots"));
 
+
+
     createPlotWidgets(Dimension::oneDim);
 }
 
@@ -55,53 +57,54 @@ void PlotComplexData::setTitle(QString title)
 //    plot->setTitle( title );
 }
 
-void PlotComplexData::setupPlot()
+void PlotComplexData::setupPlot1D()
 {
-//    // remove all previous plotitems
-//    plot->clear();
+    Q_D(PlotComplexData);
+    QLinePlot * plot = dynamic_cast<QLinePlot*>(d->plot1D);
+    if (!plot)
+        qFatal("error casting to QLinePlot");
+    // remove all previous plotitems
+    plot->clear();
 
-//    plot->setBoundingMarginPercent(10);
+    plot->setBoundingMarginPercent(10);
 
-//    // legend
-////    QwtLegend *legend = new QwtLegend;
-////    plot->insertLegend( legend, QwtPlot::BottomLegend );
+    // legend
+//    QwtLegend *legend = new QwtLegend;
+//    plot->insertLegend( legend, QwtPlot::BottomLegend );
 
-//    plot->enableAxis(QwtPlot::yRight);
+    plot->enableAxis(QwtPlot::yRight);
 
-//    plot->setAxisTitle (QwtPlot::xBottom, "x / Data Points");
-//    plot->setAxisTitle (QwtPlot::yLeft, "amplitude");
-//    plot->setAxisTitle (QwtPlot::yRight, "phase (-pi..pi)");
+    plot->setAxisTitle (QwtPlot::xBottom, "x / Data Points");
+    plot->setAxisTitle (QwtPlot::yLeft, "amplitude");
+    plot->setAxisTitle (QwtPlot::yRight, "phase (-pi..pi)");
 
-//    // Zoom
-//    plot->zoomerY2()->setEnabled(true);
+    // Zoom
+    plot->zoomerY2()->setEnabled(true);
 
-//    // Grid
-//    plot->grid()->enableX(true);
-//    plot->grid()->enableY(true);
+    // Grid
+    plot->grid()->enableX(true);
+    plot->grid()->enableY(true);
 
-//    plot->clear();
+    QPlotCurve *curve1 = new QPlotCurve();
+    curve1->setTitle( "phase" );
+    curve1->setPen( QColorPalette::color(1), 1 ),
+    curve1->setYAxis(QwtPlot::yRight);
+    // fix scale for Y2 axis
+    plot->setAxisScale(QwtPlot::yRight, -pi, pi);
 
-//    QPlotCurve *curve1 = new QPlotCurve();
-//    curve1->setTitle( "phase" );
-//    curve1->setPen( QColorPalette::color(1), 1 ),
-//    curve1->setYAxis(QwtPlot::yRight);
-//    // fix scale for Y2 axis
-//    plot->setAxisScale(QwtPlot::yRight, -pi, pi);
+    QPlotCurve *curve2 = new QPlotCurve();
+    curve2->setTitle( "amplitude" );
+    curve2->setPen( QColorPalette::color(2), 1 ),
+    curve2->setYAxis(QwtPlot::yLeft);
 
-//    QPlotCurve *curve2 = new QPlotCurve();
-//    curve2->setTitle( "amplitude" );
-//    curve2->setPen( QColorPalette::color(2), 1 ),
-//    curve2->setYAxis(QwtPlot::yLeft);
+    // attach Curve to qwtPlot
+    curve1->attach( plot );
+    curve2->attach( plot );
+    plot->replot();
 
-//    // attach Curve to qwtPlot
-//    curve1->attach( plot );
-//    curve2->attach( plot );
-//    plot->replot();
-
-//    // curves must be attached to plot, otherwise
-//    // nothing is applied.
-//    plot->setColorPalette(QColorPalette::MSOffice2007);
-
+    // curves must be attached to plot, otherwise
+    // nothing is applied.
+    plot->setColorPalette(QColorPalette::MSOffice2007);
 }
 
 
@@ -141,7 +144,8 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
     {
     case Dimension::oneDim:
         d->plot1D = new QLinePlot(this);
-        gridLayoutPlots->addWidget(d->plot1D);
+        gridLayoutPlots->addWidget(d->plot1D, 1, 1);
+        setupPlot1D();
         break;
     case Dimension::twoDim:
         d->plot2DAmplitude = new QMatrixPlot(this);
@@ -228,21 +232,23 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
     }
     case Dimension::twoDim:
     {
-        QMatrixPlot * plotMatrix = new QMatrixPlot();
+        QMatrixPlot * plot2DAmplitude = dynamic_cast<QMatrixPlot*>(d->plot2DAmplitude);
+        if (!plot2DAmplitude)
+            qFatal("error casting to QMatrixPlot");
 
-        plotMatrix->setAxisTitle (QwtPlot::xBottom, "x-axis");
-        plotMatrix->setAxisTitle (QwtPlot::yLeft, "y-axis");
+        plot2DAmplitude->setAxisTitle (QwtPlot::xBottom, "x-axis");
+        plot2DAmplitude->setAxisTitle (QwtPlot::yLeft, "y-axis");
 //        plotMatrix->setAxisTitle (QwtPlot::yRight, "signal amplitude");
 
-        plotMatrix->setMatrixData(QVector<double>::fromStdVector(dataAmplitude),
+        plot2DAmplitude->setMatrixData(QVector<double>::fromStdVector(dataAmplitude),
                             xaxis.size(),
                             QwtInterval(xaxis.front(), xaxis.back()),
                             QwtInterval(yaxis.front(), yaxis.back()));
-        plotMatrix->setResampleMode(QwtMatrixRasterData::NearestNeighbour);
+        plot2DAmplitude->setResampleMode(QwtMatrixRasterData::NearestNeighbour);
 //        plotMatrix->setContourSteps(11);
 //        plotMatrix->showContour( true );
 
-        plotMatrix->replot();
+        plot2DAmplitude->replot();
 
         break;
     }

@@ -59,7 +59,11 @@ UI_DIR = $${BUILD_DIR}/ui
 # FILES
 # #####################################################################
 
-QWT_PATH = $${PWD}/../../../libs/qwt-6.1.3
+# D:\Git\code\libdev\plot\plottools\trunk
+# D:\Git\code\..\..\..\..
+# D:\Git\code\libs\qwt-6.1.3\
+
+QWT_PATH = $${PWD}/../../../../libs/qwt-6.1.3
 
 win32 {
 CONFIG(debug, debug|release):LIBS += -L$${QWT_PATH}/lib/ -lqwtd
