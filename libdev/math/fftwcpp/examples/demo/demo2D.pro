@@ -9,7 +9,7 @@ include( ../examples.pri )
 # set Target Name
 # #####################################################################
 
-TARGET  = QFFTDemo
+TARGET  = QFFTDemo2D
 CONFIG(debug, debug|release):win32:TARGET = $$join(TARGET,,,d)
 
 # #####################################################################
@@ -74,19 +74,19 @@ LIBS += -L$${PROJECT_ROOT}/lib/fftw/double/ -llibfftw3-3
 
 
 SOURCES += main.cpp \		
-    gui/mainwindow.cpp \
-    calculationmanager.cpp
-    #gui/plotcomplexdata.cpp
+    gui/mainwindow2D.cpp \
+    calculationmanager.cpp \
+    gui/plotcomplexdata.cpp
 
-HEADERS += gui/mainwindow.h \
+HEADERS += gui/mainwindow2D.h \
     calculationmanager.h \
     functions/examplefunctions.h \
     functions/complexfunctionfactory.h \
     functions/functionfactory.h \
     gui/layouts.h \
     math/sgn.h \
-    math/phaseunwrap.h
-    #gui/plotcomplexdata.h
+    math/phaseunwrap.h \
+    gui/plotcomplexdata.h
 
 # add header files for moc
 HEADERS += ../../../../plot/plottools/trunk/src/qbaseplotwidget.h \

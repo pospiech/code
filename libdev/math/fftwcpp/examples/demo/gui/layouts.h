@@ -2,6 +2,7 @@
 #define LAYOUTS_H
 
 #include <QWidget>
+#include <QLayoutItem>
 
 void clearLayout(QLayout* layout, bool deleteWidgets = true)
 {

@@ -86,8 +86,6 @@ void MainWindow::setupWidgets()
     for (size_t i = 0; i < 4; ++i) {
         this->plotList.append(new QLinePlot(this));
     }
-//    ui->gridLayoutPlots->addWidget(plotList[0], 1, 1);
-//    ui->gridLayoutPlots->addWidget(new PlotComplexData(this), 1, 1);
     ui->gridLayoutPlots->addWidget(plotList[0], 1, 1);
     ui->gridLayoutPlots->addWidget(plotList[1], 1, 2);
     ui->gridLayoutPlots->addWidget(plotList[2], 2, 1);

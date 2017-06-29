@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QScopedPointer>
+#include <QSize>
 
 #include <vector>
 using std::vector;
@@ -13,6 +14,7 @@ using std::complex;
 #include "fftallocator.h"
 using namespace fftwcpp;
 
+#include "plottools.h"
 
 
 namespace Ui {
@@ -36,12 +38,12 @@ public:
     };
 
     void setTitle(QString title);
-    void setData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, size_t sizeY /* = 0 */);
-    void updatePlotData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, size_t sizeY);
-    void updatePlotData(vector<double> & dataAmplitude, vector<double> & dataPhase , size_t sizeY);
+    void updatePlotData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, QSize size);
+    void updatePlotData(vector<double> & dataAmplitude, vector<double> & dataPhase, QSize size);
 
 private:
     void createPlotWidgets(PlotComplexData::Dimension dimension);
+    vector<double> createAxis(size_t length);
     void setupPlot();
 
 

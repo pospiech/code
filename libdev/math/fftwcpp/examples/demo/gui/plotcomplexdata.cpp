@@ -1,5 +1,5 @@
 #include "plotcomplexdata.h"
-#include "ui_plotcomplexdata.h"
+//#include "ui_plotcomplexdata.h"
 
 #include <QGridLayout>
 static const double pi = 3.14159265358979323846;
@@ -15,9 +15,9 @@ public:
     PlotComplexData * const q_ptr;
 
     PlotComplexDataPrivate(PlotComplexData * baseClass)
-        : q_ptr(baseClass)
+        : q_ptr(baseClass)        
     {
-
+        setSize(QSize(0,0));
     }
     vector<double> dataAmplitude;
     vector<double> dataPhase;
@@ -27,8 +27,24 @@ public:
     QwtPlot * plot2DAmplitude;
     QwtPlot * plot2DPhase;
 
+    size_t sizeX;
+    size_t sizeY;
+
     bool isRemovePhaseFlipping;
 
+    void setSize(QSize size)
+    {
+        if (size.height() == 0){
+            dimension = PlotComplexData::oneDim;
+            sizeX = size.width();
+            sizeY = 0;
+        }
+        else {
+            dimension = PlotComplexData::twoDim;
+            sizeX = size.width();
+            sizeY = size.height();
+        }
+    }
 };
 
 PlotComplexData::PlotComplexData(QWidget *parent) :
@@ -153,45 +169,34 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
 
 }
 
-void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<double> & dataPhase, size_t sizeY = 0 )
+vector<double> PlotComplexData::createAxis(size_t length)
+{
+    // create x-axis
+    vector<double> axis(length);
+    const int halfsizeX = int(length/2);
+    for (size_t i=0; i < length; ++i)
+    {
+        axis[i] = int(i) - halfsizeX;
+    }
+    return axis;
+}
+
+void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<double> & dataPhase, QSize size)
 {
     Q_D(PlotComplexData);
 
-    // determine size of vector or matrix
-    size_t sizeX;
-    const size_t N = dataAmplitude.size();
-    if (sizeY == 0)
-    {
-        sizeX = N;
-        // create plot widgets (and destroy wrong ones)
-        createPlotWidgets(Dimension::oneDim);
-        d->dimension = Dimension::oneDim;
-    }
-    else
-    {
-        sizeX = N/sizeY;
-        // check sizeX is a full number (integer)
-        // create plot widgets (and destroy wrong ones)
-        createPlotWidgets(Dimension::twoDim);
-        d->dimension = Dimension::twoDim;
-    }
+    // set sizeX and sizeY and determine Dimension
+    d->setSize(size);
+    // create plot widgets for Dimension
+    createPlotWidgets(d->dimension);
 
     // create x-axis
-    vector<double> xaxis(sizeX);
-    const int halfsizeX = int(sizeX/2);
-    for (size_t i=0; i < sizeX; ++i)
-    {
-        xaxis[i] = int(i) - halfsizeX;
-    }
+    vector<double> xaxis = createAxis(d->sizeX);
     // also for y-axis
-    vector<double> yaxis(sizeY);
-    if (sizeY > 0) {
-        const int halfsizeY = int(sizeY/2);
-        for (size_t i=0; i < sizeY; ++i)
-        {
-            yaxis[i] = int(i) - halfsizeY;
-        }
-    }
+    vector<double> yaxis;
+    if (d->sizeY > 0)
+        yaxis = createAxis(d->sizeY);
+
     // wrap phase values by 2 pi
     for (size_t i=0; i < dataPhase.size(); ++i)
     {
@@ -251,7 +256,7 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
 }
 
 
-void PlotComplexData::updatePlotData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, size_t sizeY = 0)
+void PlotComplexData::updatePlotData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, QSize size)
 {
     size_t N = data.size();
     vector<double> dataAmplitude(N);
@@ -262,49 +267,5 @@ void PlotComplexData::updatePlotData(const std::vector<complex<double>,fftalloc<
         dataPhase[i]     = arg(data[i]);
     }
 
-    updatePlotData(dataAmplitude, dataPhase, sizeY);
+    updatePlotData(dataAmplitude, dataPhase, size);
 }
-
-
-
-//void MainWindow::updatePlotData(QwtPlot *plot, vector<double> & dataAmplitude, vector<double> & dataPhase )
-//{
-//    vector<double> x(dataAmplitude.size());
-
-//    int halfsize = int(dataAmplitude.size()/2);
-//    // if phase values should be unwrapped wrap them
-//    // by 2 pi to fit into complex values.
-//    for (size_t i=0; i < dataPhase.size(); ++i)
-//    {
-//        x[i] = int(i) - halfsize;
-//        dataPhase[i] = fmod(dataPhase[i], pi*1.00001);
-//    }
-//    // remove phase flipping in ifft data if selected
-//    if (ui->checkBoxPhaseUnwrap->checkState() == Qt::Checked) {
-//        if (plot->property("type").toString() == "ifft")
-//        {
-//            removePhaseFlipping(dataPhase);
-//        }
-//    }
-//    // currently only 1D plots are supported
-//    QLinePlot * plot1D = dynamic_cast<QLinePlot*>(plot);
-//    if (!plot1D)
-//        return;
-
-//    // pass data points to graphs:
-//    plot1D->curve(0)->setData(x, dataPhase);
-//    plot1D->curve(1)->setData(x, dataAmplitude);
-
-//    // manual scale: for amplitude (Phase is fixed anyway)
-//    double minValue = *std::min_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-//    double maxValue = *std::max_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-//    minValue = std::min(0.0, minValue);
-
-//    if (minValue == maxValue)
-//    {
-//        maxValue = minValue + 1;
-//    }
-
-//    plot1D->setAxisScale(QwtPlot::yLeft,minValue,maxValue * 1.2);
-//    plot1D->replot();
-//}

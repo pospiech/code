@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QMutex>
 #include <QScopedPointer>
+#include <QSize>
+
 #include <complex>
 using std::complex;
 #include <vector>
@@ -25,10 +27,11 @@ public:
 
     void setShiftBeforeFFT(bool doShift);
     bool shiftBeforeFFT() const;
-    void setData(const vector<complex<double>,fftalloc<complex<double> > > & data);
+    void setData(const vector<complex<double>,fftalloc<complex<double> > > & data, QSize size);
     void setIterations(size_t N);
     void setSpeed(double timeSeconds);
     double speed() const;
+    QSize size() const;
 
     vector<complex<double>,fftalloc<complex<double> > > data(fftAction action = fftAction::noshift);
     vector<complex<double>,fftalloc<complex<double> > > dataFwdFourier(fftAction doShift = fftAction::noshift);

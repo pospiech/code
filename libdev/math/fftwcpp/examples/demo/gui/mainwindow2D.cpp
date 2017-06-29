@@ -1,5 +1,5 @@
 #include "mainwindow2D.h"
-#include "ui_mainwindow2D.h"
+#include "ui_mainwindow.h"
 
 #include <QDoubleSpinBox>
 
@@ -24,10 +24,9 @@ using std::complex;
 #include "fftallocator.h"
 using namespace fftwcpp;
 
+// all plot details are within this class
+// the mainwindow only transfers data
 #include "plotcomplexdata.h"
-
-#include "plottools.h"
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -81,24 +80,6 @@ void MainWindow::setupWidgets()
     ui->comboBoxDataPoints->addItem("1024", 1024);
     ui->comboBoxDataPoints->addItem("4096", 4096);
     ui->comboBoxDataPoints->addItem("16384", 16384);
-
-//    for (size_t i = 0; i < 4; ++i) {
-//        this->plotList.append(new QLinePlot(this));
-//    }
-//    ui->gridLayoutPlots->addWidget(plotList[0], 1, 1);
-//    ui->gridLayoutPlots->addWidget(plotList[1], 1, 2);
-//    ui->gridLayoutPlots->addWidget(plotList[2], 2, 1);
-//    ui->gridLayoutPlots->addWidget(plotList[3], 2, 2);
-//    // make plot classed identifiable
-//    plotList[0]->setProperty("type", "data");
-//    plotList[1]->setProperty("type", "fft");
-//    plotList[2]->setProperty("type", "ifft");
-//    plotList[3]->setProperty("type", "compare");
-//    // configure their apperience
-//    setupPlot(plotList[0], "Original Data");
-//    setupPlot(plotList[1], "Fourier Transform");
-//    setupPlot(plotList[2], "Invers Fourier Transform of Fourier Data");
-//    setupPlot(plotList[3], "Difference to Original Data");
 
     for (size_t i = 0; i < 4; ++i) {
         this->plotWidgetList.append(new PlotComplexData(this));
@@ -321,9 +302,9 @@ void MainWindow::getResultsAndPlot()
          doShift = static_cast<fftAction>(calculationManager->shiftBeforeFFT());
     }
 
-    plotWidgetList[0]->updatePlotData(calculationManager->data(doShift) );
-    plotWidgetList[1]->updatePlotData(calculationManager->dataFwdFourier(doShift) );
-    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift) );
+    plotWidgetList[0]->updatePlotData(calculationManager->data(doShift), calculationManager->size() );
+    plotWidgetList[1]->updatePlotData(calculationManager->dataFwdFourier(doShift), calculationManager->size() );
+    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift), calculationManager->size() );
 
 
     // store original and invers data for explicit comparision
@@ -339,7 +320,7 @@ void MainWindow::getResultsAndPlot()
         dataPhase[i]     = arg(inv[i]) - arg(orig[i]);
     }
 
-    plotWidgetList[3]->updatePlotData(dataAmplitude, dataPhase);
+    plotWidgetList[3]->updatePlotData(dataAmplitude, dataPhase, calculationManager->size());
 
 }
 
@@ -363,7 +344,7 @@ void MainWindow::on_checkBoxPhaseUnwrap_stateChanged(int state)
     Q_UNUSED(state);
     // update plot only
     fftAction doShift = static_cast<fftAction>(calculationManager->shiftBeforeFFT());
-    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift) );
+    plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift), calculationManager->size() );
 }
 
 void MainWindow::on_pushButtonStartFFT_clicked()
@@ -375,9 +356,17 @@ void MainWindow::startFFT()
 {
     // TODO: Add mutex
 
-    const int N = ui->comboBoxDataPoints->currentData().toInt();
-
     const int iterations = ui->spinBoxIterations->value();
+
+    const int N = ui->comboBoxDataPoints->currentData().toInt();
+    int dimensions = this->buttonGroupFFTDimension->checkedId();
+    QSize MatrixSize;
+    if (dimensions == 1)
+        MatrixSize = QSize(N,0);
+    else
+        MatrixSize = QSize(N,N);
+
+
 
     QSharedPointer<FunctionFactory> functionAmplitude =
             QSharedPointer<FunctionFactory>(this->functionListAmplitude.at(ui->comboBoxFunctionsAmplitude->currentIndex()));
@@ -389,7 +378,7 @@ void MainWindow::startFFT()
     complexFF->setPhaseFunction(functionPhase);
 
     calculationManager->setIterations(iterations);
-    calculationManager->setData(complexFF->complexData(N));
+    calculationManager->setData(complexFF->complexData(N), MatrixSize);
     calculationManager->moveToThread(thread);
 
     //connect(calculationManager, SIGNAL (error(QString)), this, SLOT (errorString(QString)));
