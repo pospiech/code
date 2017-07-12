@@ -60,3 +60,12 @@ bin_debug
 /libdev/qt/qtwidgets/QScienceSpinbox/qscispinbox.pro.user.9fc16ce
 /libdev/qt/qtwidgets/build-qscispinbox-Desktop_Qt_5_7_0_MinGW_32bit-Debug
 /libdev/math/fftwcpp/fftwcpp.pro.user.5104b59
+/libdev/math/build-fftwcpp-Desktop_Qt_5_8_0_MinGW_32bit-Debug
+/libdev/math/build-fftwcpp-Desktop_Qt_5_8_0_MinGW_32bit-Release
+/libdev/math/fftwcpp/examples/build-demo2D-Desktop_Qt_5_8_0_MinGW_32bit-Debug
+/libdev/math/fftwcpp/examples/build-demo2D-Desktop_Qt_5_8_0_MinGW_32bit-Debug
+/libdev/math/fftwcpp/examples/bin
+/libdev/math/fftwcpp/examples/build
+/libdev/math/fftwcpp/examples/build-demo2D-Desktop_Qt_5_8_0_MinGW_32bit-Release
+/libdev/math/fftwcpp/fftwcpp.pro.user.0b16c0b
+/libdev/math/fftwcpp/fftwcpp.pro.user.510ac9d
