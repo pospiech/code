@@ -61,6 +61,8 @@ PlotComplexData::PlotComplexData(QWidget *parent) :
     gridLayoutPlots = new QGridLayout(this);
     gridLayoutPlots->setObjectName(QStringLiteral("gridLayoutPlots"));
 
+
+
     createPlotWidgets(Dimension::oneDim);
 }
 
@@ -227,21 +229,23 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
     }
     case Dimension::twoDim:
     {
-        QMatrixPlot * plotMatrix = new QMatrixPlot();
+        QMatrixPlot * plot2DAmplitude = dynamic_cast<QMatrixPlot*>(d->plot2DAmplitude);
+        if (!plot2DAmplitude)
+            qFatal("error casting to QMatrixPlot");
 
-        plotMatrix->setAxisTitle (QwtPlot::xBottom, "x-axis");
-        plotMatrix->setAxisTitle (QwtPlot::yLeft, "y-axis");
+        plot2DAmplitude->setAxisTitle (QwtPlot::xBottom, "x-axis");
+        plot2DAmplitude->setAxisTitle (QwtPlot::yLeft, "y-axis");
 //        plotMatrix->setAxisTitle (QwtPlot::yRight, "signal amplitude");
 
-        plotMatrix->setMatrixData(QVector<double>::fromStdVector(dataAmplitude),
+        plot2DAmplitude->setMatrixData(QVector<double>::fromStdVector(dataAmplitude),
                             xaxis.size(),
                             QwtInterval(xaxis.front(), xaxis.back()),
                             QwtInterval(yaxis.front(), yaxis.back()));
-        plotMatrix->setResampleMode(QwtMatrixRasterData::NearestNeighbour);
+        plot2DAmplitude->setResampleMode(QwtMatrixRasterData::NearestNeighbour);
 //        plotMatrix->setContourSteps(11);
 //        plotMatrix->showContour( true );
 
-        plotMatrix->replot();
+        plot2DAmplitude->replot();
 
         break;
     }

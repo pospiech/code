@@ -11,23 +11,24 @@ include( examples.pri )
 TARGET = PlotToolsExamples
 
 SOURCES = \
-    examples\plottoolstest.cpp \
+    examples/plottoolstest.cpp \
     examples/functions/qplotfunction.cpp
 
 
 HEADERS += \
-    qplotcurve.h \
-    qlineplot.h \
-    qplotzoomer.h \
-    qcolorpalette.h \
-    qbaseplotwidget.h \
-    qcolormap.h \
-    qmatrixplot.h \
+    src/qplotcurve.h \
+    src/qlineplot.h \
+    src/qplotzoomer.h \
+    src/qcolorpalette.h \
+    src/qbaseplotwidget.h \
+    src/qcolormap.h \
+    src/qmatrixplot.h \
     examples/functions/qplotfunction.h \
     examples/functions/constants.h \
     examples/functions/functions.h
 
 INCLUDEPATH += $${PROJECT_ROOT}/examples/functions
+INCLUDEPATH += $${PROJECT_ROOT}/src
 
 DISTFILES += \
     docs/plottools.dox

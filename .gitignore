@@ -66,6 +66,15 @@ bin_debug
 /libdev/math/fftwcpp/examples/build-demo2D-Desktop_Qt_5_8_0_MinGW_32bit-Debug
 /libdev/math/fftwcpp/examples/bin
 /libdev/math/fftwcpp/examples/build
+/libdev/math/fftwcpp/examples/demo/*.stash
+/libdev/math/fftwcpp/doc/latex
+/libdev/math/fftwcpp/doc/html
+/libdev/math/fftwcpp/examples/demo/object_script.QFFTDemo.Release
+/libdev/math/fftwcpp/examples/demo/object_script.QFFTDemod.Debug
+/libdev/math/fftwcpp/fftwcpp.pro.user.24fec32
+/libdev/math/build-fftwcpp-Desktop_Qt_5_7_0_MinGW_32bit-Debug
 /libdev/math/fftwcpp/examples/build-demo2D-Desktop_Qt_5_8_0_MinGW_32bit-Release
 /libdev/math/fftwcpp/fftwcpp.pro.user.0b16c0b
 /libdev/math/fftwcpp/fftwcpp.pro.user.510ac9d
+/libdev/qt/qtwidgets/QScienceSpinbox/qscispinbox.pro.user.5104b59
+/libdev/qt/qtwidgets/QScienceSpinbox/*.stash

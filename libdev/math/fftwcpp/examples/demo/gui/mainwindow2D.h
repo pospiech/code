@@ -52,6 +52,7 @@ private slots:
     void on_comboBoxDataPoints_currentIndexChanged(int index);
     void updateFunctionParameterSettings();
     void updateProgressBar(int percent);
+    void onDimensionsChanged(size_t N);
 
 private:
 //    void setupPlot(QLinePlot *plot, QString title);

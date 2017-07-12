@@ -29,6 +29,11 @@ public:
     bool shiftBeforeFFT() const;
     void setData(const vector<complex<double>,fftalloc<complex<double> > > & data, QSize size);
     void setIterations(size_t N);
+
+    void setDimensions(size_t N);
+    size_t dimensions();
+    QSize size();
+
     void setSpeed(double timeSeconds);
     double speed() const;
     QSize size() const;
@@ -38,6 +43,7 @@ public:
     vector<complex<double>,fftalloc<complex<double> > > dataInvFourier(fftAction doShift = fftAction::noshift);
     vector<complex<double>,fftalloc<complex<double> > > dataCompare(fftAction doShift = fftAction::noshift);
 
+
 public slots:
     // thread run function
     void process();    
@@ -46,6 +52,7 @@ signals:
     void finished();
     void error(QString err);
     void iteration(int);
+    void dimensionsChanged(size_t);
 
 protected:
     const QScopedPointer<CalculationManagerPrivate> d_ptr;
