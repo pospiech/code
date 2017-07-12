@@ -23,6 +23,7 @@ class PlotComplexData;
 
 class PlotComplexDataPrivate;
 class QGridLayout;
+class QwtPlot;
 
 class PlotComplexData : public QWidget
 {
@@ -44,7 +45,8 @@ public:
 private:
     void createPlotWidgets(PlotComplexData::Dimension dimension);
     vector<double> createAxis(size_t length);
-    void setupPlot();
+    void setupLinePlot(QwtPlot * plot);
+    void setupMatrixPlot(QwtPlot * plot);
 
 
 protected:

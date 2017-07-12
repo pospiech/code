@@ -71,77 +71,60 @@ void PlotComplexData::setTitle(QString title)
 //    plot->setTitle( title );
 }
 
-void PlotComplexData::setupPlot()
+void PlotComplexData::setupLinePlot(QwtPlot * qwtplot)
 {
-//    // remove all previous plotitems
-//    plot->clear();
+    QLinePlot * plot = dynamic_cast<QLinePlot*>(qwtplot);
+    if (!plot)
+        qFatal("error casting to QLinePlot");
 
-//    plot->setBoundingMarginPercent(10);
+    plot->setBoundingMarginPercent(10);
 
-//    // legend
-////    QwtLegend *legend = new QwtLegend;
-////    plot->insertLegend( legend, QwtPlot::BottomLegend );
+    // legend
+//    QwtLegend *legend = new QwtLegend;
+//    plot->insertLegend( legend, QwtPlot::BottomLegend );
 
-//    plot->enableAxis(QwtPlot::yRight);
+    plot->enableAxis(QwtPlot::yRight);
 
-//    plot->setAxisTitle (QwtPlot::xBottom, "x / Data Points");
-//    plot->setAxisTitle (QwtPlot::yLeft, "amplitude");
-//    plot->setAxisTitle (QwtPlot::yRight, "phase (-pi..pi)");
+    plot->setAxisTitle (QwtPlot::xBottom, "x / Data Points");
+    plot->setAxisTitle (QwtPlot::yLeft, "amplitude");
+    plot->setAxisTitle (QwtPlot::yRight, "phase (-pi..pi)");
 
-//    // Zoom
-//    plot->zoomerY2()->setEnabled(true);
+    // Zoom
+    plot->zoomerY2()->setEnabled(true);
 
-//    // Grid
-//    plot->grid()->enableX(true);
-//    plot->grid()->enableY(true);
+    // Grid
+    plot->grid()->enableX(true);
+    plot->grid()->enableY(true);
 
-//    plot->clear();
+    // remove all previous plotitems
+    plot->clear();
 
-//    QPlotCurve *curve1 = new QPlotCurve();
-//    curve1->setTitle( "phase" );
-//    curve1->setPen( QColorPalette::color(1), 1 ),
-//    curve1->setYAxis(QwtPlot::yRight);
-//    // fix scale for Y2 axis
-//    plot->setAxisScale(QwtPlot::yRight, -pi, pi);
+    QPlotCurve *curve1 = new QPlotCurve();
+    curve1->setTitle( "phase" );
+    curve1->setPen( QColorPalette::color(1), 1 ),
+    curve1->setYAxis(QwtPlot::yRight);
+    // fix scale for Y2 axis
+    plot->setAxisScale(QwtPlot::yRight, -pi, pi);
 
-//    QPlotCurve *curve2 = new QPlotCurve();
-//    curve2->setTitle( "amplitude" );
-//    curve2->setPen( QColorPalette::color(2), 1 ),
-//    curve2->setYAxis(QwtPlot::yLeft);
+    QPlotCurve *curve2 = new QPlotCurve();
+    curve2->setTitle( "amplitude" );
+    curve2->setPen( QColorPalette::color(2), 1 ),
+    curve2->setYAxis(QwtPlot::yLeft);
 
-//    // attach Curve to qwtPlot
-//    curve1->attach( plot );
-//    curve2->attach( plot );
-//    plot->replot();
+    // attach Curve to qwtPlot
+    curve1->attach( plot );
+    curve2->attach( plot );
+    plot->replot();
 
-//    // curves must be attached to plot, otherwise
-//    // nothing is applied.
-//    plot->setColorPalette(QColorPalette::MSOffice2007);
-
+    // curves must be attached to plot, otherwise
+    // nothing is applied.
+    plot->setColorPalette(QColorPalette::MSOffice2007);
 }
 
+void PlotComplexData::setupMatrixPlot(QwtPlot * plot)
+{
 
-//void PlotComplexData::setData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, size_t sizeY = 0)
-//{
-
-
-//    // copy to internal vector
-//    try {
-//        d->dataAmplitude.resize(N);
-//        d->dataPhase.resize(N);
-//    } catch (std::bad_alloc const&) {
-//        qCritical() << "Memory allocation fail!" << endl;
-//        d->dataAmplitude.clear();
-//        d->dataPhase.clear();
-//        return;
-//    }
-
-//    for(std::vector<complex<double> >::size_type i = 0; i != data.size(); i++) {
-//        d->dataAmplitude[i] = abs(data[i]);
-//        d->dataPhase[i]     = arg(data[i]);
-//    }
-//}
-
+}
 
 void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
 {
@@ -157,6 +140,7 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
     {
     case Dimension::oneDim:
         d->plot1D = new QLinePlot(this);
+        setupLinePlot(d->plot1D);
         gridLayoutPlots->addWidget(d->plot1D);
         break;
     case Dimension::twoDim:
@@ -172,11 +156,17 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
 vector<double> PlotComplexData::createAxis(size_t length)
 {
     // create x-axis
-    vector<double> axis(length);
-    const int halfsizeX = int(length/2);
+    vector<double> axis;
+    try {
+        axis.resize(length);
+    } catch (std::bad_alloc const&) {
+        qCritical() << "Memory allocation fail!" << endl;
+    }
+
+    const int halfsize = int(length/2);
     for (size_t i=0; i < length; ++i)
     {
-        axis[i] = int(i) - halfsizeX;
+        axis[i] = int(i) - halfsize;
     }
     return axis;
 }
@@ -198,10 +188,13 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
         yaxis = createAxis(d->sizeY);
 
     // wrap phase values by 2 pi
-    for (size_t i=0; i < dataPhase.size(); ++i)
-    {
-        dataPhase[i] = fmod(dataPhase[i], pi*1.00001);
-    }
+    std::transform(dataPhase.begin(), dataPhase.end(), dataPhase.begin(),
+                   [](double v){return fmod(v, pi*1.00001); }
+    );
+//    for (size_t i=0; i < dataPhase.size(); ++i)
+//    {
+//        dataPhase[i] = fmod(dataPhase[i], pi*1.00001);
+//    }
     // remove phase flipping in ifft data if selected
     if (d->isRemovePhaseFlipping) {
         removePhaseFlipping(dataPhase);

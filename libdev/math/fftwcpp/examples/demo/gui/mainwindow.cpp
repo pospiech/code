@@ -485,7 +485,7 @@ void MainWindow::startFFT()
     complexFF->setPhaseFunction(functionPhase);
 
     calculationManager->setIterations(iterations);
-    calculationManager->setData(complexFF->complexData(N));
+    calculationManager->setData(complexFF->complexData(N);
     calculationManager->moveToThread(thread);
 
     //connect(calculationManager, SIGNAL (error(QString)), this, SLOT (errorString(QString)));
