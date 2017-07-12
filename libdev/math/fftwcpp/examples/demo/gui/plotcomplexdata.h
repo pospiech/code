@@ -33,7 +33,8 @@ public:
     explicit PlotComplexData(QWidget *parent = 0);
     virtual ~PlotComplexData();
 
-    enum Dimension {
+    enum class Dimension {
+        undefined = 0,
         oneDim = 1, // 1D
         twoDim = 2  // 2D
     };

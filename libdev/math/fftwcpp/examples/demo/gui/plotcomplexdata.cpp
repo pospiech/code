@@ -10,6 +10,7 @@ static const double pi = 3.14159265358979323846;
 class PlotComplexDataPrivate
 {
 public:
+    friend class PlotComplexData;
     Q_DISABLE_COPY(PlotComplexDataPrivate)
     Q_DECLARE_PUBLIC(PlotComplexData)
     PlotComplexData * const q_ptr;
@@ -18,7 +19,9 @@ public:
         : q_ptr(baseClass)        
     {
         setSize(QSize(0,0));
+        dimension = PlotComplexData::Dimension::undefined;
     }
+
     vector<double> dataAmplitude;
     vector<double> dataPhase;
     PlotComplexData::Dimension dimension;
@@ -35,12 +38,12 @@ public:
     void setSize(QSize size)
     {
         if (size.height() == 0){
-            dimension = PlotComplexData::oneDim;
+            dimension = PlotComplexData::Dimension::oneDim;
             sizeX = size.width();
             sizeY = 0;
         }
         else {
-            dimension = PlotComplexData::twoDim;
+            dimension = PlotComplexData::Dimension::twoDim;
             sizeX = size.width();
             sizeY = size.height();
         }
@@ -135,22 +138,23 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
         QLayoutItem *child;
         while ((child = gridLayoutPlots->takeAt(0)) != 0)
             delete child;
-    }
-    switch (dimension)
-    {
-    case Dimension::oneDim:
-        d->plot1D = new QLinePlot(this);
-        setupLinePlot(d->plot1D);
-        gridLayoutPlots->addWidget(d->plot1D);
-        break;
-    case Dimension::twoDim:
-        d->plot2DAmplitude = new QMatrixPlot(this);
-        d->plot2DPhase = new QMatrixPlot(this);
-        gridLayoutPlots->addWidget(d->plot2DAmplitude, 1, 1);
-        gridLayoutPlots->addWidget(d->plot2DPhase, 1, 2);
-        break;
-    }
 
+        // create widgets only on Dimension changes and initially
+        switch (dimension)
+        {
+        case Dimension::oneDim:
+            d->plot1D = new QLinePlot(this);
+            setupLinePlot(d->plot1D);
+            gridLayoutPlots->addWidget(d->plot1D);
+            break;
+        case Dimension::twoDim:
+            d->plot2DAmplitude = new QMatrixPlot(this);
+            d->plot2DPhase = new QMatrixPlot(this);
+            gridLayoutPlots->addWidget(d->plot2DAmplitude, 1, 1);
+            gridLayoutPlots->addWidget(d->plot2DPhase, 1, 2);
+            break;
+        }
+    }
 }
 
 vector<double> PlotComplexData::createAxis(size_t length)
@@ -191,10 +195,7 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
     std::transform(dataPhase.begin(), dataPhase.end(), dataPhase.begin(),
                    [](double v){return fmod(v, pi*1.00001); }
     );
-//    for (size_t i=0; i < dataPhase.size(); ++i)
-//    {
-//        dataPhase[i] = fmod(dataPhase[i], pi*1.00001);
-//    }
+
     // remove phase flipping in ifft data if selected
     if (d->isRemovePhaseFlipping) {
         removePhaseFlipping(dataPhase);
