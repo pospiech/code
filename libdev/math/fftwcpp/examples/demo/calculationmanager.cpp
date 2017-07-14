@@ -19,6 +19,7 @@ public:
         : q_ptr(parent)
         , speed(0)
         , is2D(false)
+        , dimensions(0)
     {        
     }
     ~CalculationManagerPrivate()
@@ -39,22 +40,22 @@ public:
     size_t iterations;
     double speed;
     bool is2D;
+    size_t dimensions; //! none = 0, 1D = 1, 2D = 2, etc.
 
     // data vectors
     vector<complex<double>,fftalloc<complex<double> > > dataOriginal; //! Orignal Data
     vector<complex<double>,fftalloc<complex<double> > > dataFwdFourier;  //! Fourier Transformed Data
     vector<complex<double>,fftalloc<complex<double> > > dataInvFourier; //! Invers Fourier Calculated Data
 
-    void setSize(size_t N)
+    //! set size of vector elements (total number of elements)
+    void setDataSize(size_t N)
     {
         this->N = N;
         dataFwdFourier.resize(N);
         dataInvFourier.resize(N);
-        if (dimensions == 1)
-            matrixSize = QSize(N,0);
-        else
-            matrixSize = QSize(sqrt(N),sqrt(N));
     }
+
+    //! set size of 1D vector or 2D Matrix
     void setMatrixSize(QSize size)
     {
         this->size = size;
@@ -84,39 +85,46 @@ CalculationManager::~CalculationManager()
 //! set shift variable for fftshift operation before the forward fft
 void CalculationManager::setShiftBeforeFFT(bool doShift)
 {
-    d_ptr->doShiftBeforeFFT = doShift;
+    Q_D(CalculationManager);
+    d->doShiftBeforeFFT = doShift;
 }
 
 
 //! value of shift variable for fftshift operation before the forward fft
 bool CalculationManager::shiftBeforeFFT() const
 {
-    return d_ptr->doShiftBeforeFFT;
+    Q_D(const CalculationManager);
+    return d->doShiftBeforeFFT;
 }
 
 
 //! set number of iterations for fft loop
 void CalculationManager::setIterations(size_t N)
 {
-    d_ptr->iterations = N;
+    Q_D(CalculationManager);
+    d->iterations = N;
 }
 
 void CalculationManager::setDimensions(size_t N)
 {
-    const size_t  oldN = d_ptr->dimensions;
-    d_ptr->dimensions = N;
+    Q_D(CalculationManager);
+    const size_t  oldN = d->dimensions;
+    d->dimensions = N;
     if (N != oldN)
         emit dimensionsChanged(N);
 }
 
-size_t CalculationManager::dimensions()
+size_t CalculationManager::dimensions() const
 {
-    return d_ptr->dimensions;
+    Q_D(const CalculationManager);
+    return d->dimensions;
 }
 
-QSize CalculationManager::size()
+/*! provide size of 1D vector or 2D matrix */
+QSize CalculationManager::size() const
 {
-    return d_ptr->matrixSize;
+    Q_D(const CalculationManager);
+    return d->size;
 }
 
 
@@ -124,12 +132,13 @@ QSize CalculationManager::size()
 //! \param data complex double vector
 void CalculationManager::setData(const vector<complex<double>,fftalloc<complex<double> > > & data, QSize size = QSize(0,0))
 {
+    Q_D(CalculationManager);
     QMutexLocker locker(&mutex);
-    d_ptr->dataOriginal = data;
-    d_ptr->setSize(data.size());
+    d->dataOriginal = data;
+    d->setDataSize(data.size());
     if (size.isEmpty())
         size.setWidth(data.size());
-    d_ptr->setMatrixSize(size);
+    d->setMatrixSize(size);
 }
 
 //! get original data
@@ -139,58 +148,61 @@ void CalculationManager::setData(const vector<complex<double>,fftalloc<complex<d
 //! If fftshift is applied, the a shifted copy of the original data is returned.
 vector<complex<double>,fftalloc<complex<double> > > CalculationManager::data(fftAction action)
 {
+    Q_D(CalculationManager);
     QMutexLocker locker(&mutex);
 
     if (action==fftAction::shift) {
         // create copy
-        vector<complex<double>,fftalloc<complex<double> > > copy (d_ptr->dataOriginal);
+        vector<complex<double>,fftalloc<complex<double> > > copy (d->dataOriginal);
         // shift copy
-        if (d_ptr->is2D)
-            fftshift(copy, d_ptr->size.width(), d_ptr->size.height());
+        if (d->is2D)
+            fftshift(copy, d->size.width(), d->size.height());
         else
             fftshift(copy);
         return copy;
     }
     else {
-        return d_ptr->dataOriginal;
+        return d->dataOriginal;
     }
 }
 
 //! get forward fourier data
 vector<complex<double>,fftalloc<complex<double> > > CalculationManager::dataFwdFourier(fftAction action)
 {
+    Q_D(CalculationManager);
     QMutexLocker locker(&mutex);
 
     if (action==fftAction::shift) {
-        vector<complex<double>,fftalloc<complex<double> > > copy = d_ptr->dataFwdFourier;
+        vector<complex<double>,fftalloc<complex<double> > > copy = d->dataFwdFourier;
         // shift copy
-        if (d_ptr->is2D)
-            fftshift(copy, d_ptr->size.width(), d_ptr->size.height());
+        if (d->is2D)
+            fftshift(copy, d->size.width(), d->size.height());
         else
             fftshift(copy);
         return copy;
     }
     else {
-        return d_ptr->dataFwdFourier;
+        return d->dataFwdFourier;
     }
 }
 
 //! get invers fourier data
 vector<complex<double>,fftalloc<complex<double> > > CalculationManager::dataInvFourier(fftAction action)
 {
+    Q_D(CalculationManager);
     QMutexLocker locker(&mutex);
 
     if (action==fftAction::shift) {
-        vector<complex<double>,fftalloc<complex<double> > > copy = d_ptr->dataInvFourier;
+        vector<complex<double>,fftalloc<complex<double> > > copy = d->dataInvFourier;
         // shift copy
-        if (d_ptr->is2D)
-            fftshift(copy, d_ptr->size.width(), d_ptr->size.height());
+        if (d->is2D)
+            fftshift(copy, d->size.width(), d->size.height());
         else
             fftshift(copy);
         return copy;
     }
     else {
-        return d_ptr->dataInvFourier;
+        return d->dataInvFourier;
     }
 }
 
@@ -198,13 +210,14 @@ vector<complex<double>,fftalloc<complex<double> > > CalculationManager::dataInvF
 //! \note mathematically both must be the same.
 vector<complex<double>,fftalloc<complex<double> > > CalculationManager::dataCompare(fftAction action)
 {
+    Q_D(CalculationManager);
     QMutexLocker locker(&mutex);
 
-    vector<complex<double>,fftalloc<complex<double> > > dataCompare(d_ptr->N);
+    vector<complex<double>,fftalloc<complex<double> > > dataCompare(d->N);
     // substract vectors
-    std::transform(begin(d_ptr->dataOriginal),
-                   end(d_ptr->dataOriginal),
-                   begin(d_ptr->dataInvFourier),
+    std::transform(begin(d->dataOriginal),
+                   end(d->dataOriginal),
+                   begin(d->dataInvFourier),
                    begin(dataCompare),std::minus< complex<double> >());
 
 //    for(std::vector<complex<double> >::size_type i = 0; i != dataCompare.size(); i++) {
@@ -214,12 +227,13 @@ vector<complex<double>,fftalloc<complex<double> > > CalculationManager::dataComp
 //    }
 
     if (action==fftAction::shift)
+    {
         // shift copy
-        if (d_ptr->is2D)
-            fftshift(dataCompare, d_ptr->size.width(), d_ptr->size.height());
+        if (d->is2D)
+            fftshift(dataCompare, d->size.width(), d->size.height());
         else
             fftshift(dataCompare);
-
+    }
     return dataCompare;
 }
 
@@ -227,53 +241,54 @@ vector<complex<double>,fftalloc<complex<double> > > CalculationManager::dataComp
 //! \note This is a slot for the QThread signal started()
 void CalculationManager::process()
 {
+    Q_D(CalculationManager);
     QMutexLocker locker(&mutex);
 
-    cout << "calc FFT: process(), iterations: " << d_ptr->iterations<< endl;
+    cout << "calc FFT: process(), iterations: " << d->iterations<< endl;
 
     const clock_t clockStart=clock();
     double percent = 0;
 
-    if (!d_ptr->is2D)
+    if (!d->is2D)
     {
-        if (d_ptr->doShiftBeforeFFT)
-            ifftshift(d_ptr->dataOriginal);
+        if (d->doShiftBeforeFFT)
+            ifftshift(d->dataOriginal);
 
         // forward FFT;
-        d_ptr->fft.fwd(d_ptr->dataFwdFourier, d_ptr->dataOriginal);
+        d->fft.fwd(d->dataFwdFourier, d->dataOriginal);
 
-        for (size_t i = 0; i < d_ptr->iterations; ++i)
+        for (size_t i = 0; i < d->iterations; ++i)
         {
             if (i>0) {
                 // forward FFT; input is last invers FFT
-                d_ptr->fft.fwd(d_ptr->dataFwdFourier, d_ptr->dataInvFourier);
+                d->fft.fwd(d->dataFwdFourier, d->dataInvFourier);
             }
 
             // invers FFT;
-            d_ptr->fft.inv(d_ptr->dataInvFourier, d_ptr->dataFwdFourier);
+            d->fft.inv(d->dataInvFourier, d->dataFwdFourier);
 
-            percent = double(i+1)/(d_ptr->iterations)*100;
+            percent = double(i+1)/(d->iterations)*100;
             emit iteration(int(percent));
         }
     }
     else { // 2D
-        if (d_ptr->doShiftBeforeFFT)
-            ifftshift(d_ptr->dataOriginal, d_ptr->size.width(), d_ptr->size.height());
+        if (d->doShiftBeforeFFT)
+            ifftshift(d->dataOriginal, d->size.width(), d->size.height());
 
         // forward FFT;
-//        d_ptr->fft.fwd2D(d_ptr->dataFwdFourier, d_ptr->dataOriginal);
+        d->fft.fwd2(d->dataFwdFourier, d->dataOriginal, d->size.width(), d->size.height());
 
-        for (size_t i = 0; i < d_ptr->iterations; ++i)
+        for (size_t i = 0; i < d->iterations; ++i)
         {
             if (i>0) {
                 // forward FFT; input is last invers FFT
-//                d_ptr->fft.fwd2D(d_ptr->dataFwdFourier, d_ptr->dataInvFourier);
+                d->fft.fwd2(d->dataFwdFourier, d->dataInvFourier, d->size.width(), d->size.height());
             }
 
             // invers FFT;
-//            d_ptr->fft.inv2D(d_ptr->dataInvFourier, d_ptr->dataFwdFourier);
+            d->fft.inv2(d->dataInvFourier, d->dataFwdFourier, d->size.width(), d->size.height());
 
-            percent = double(i+1)/(d_ptr->iterations)*100;
+            percent = double(i+1)/(d->iterations)*100;
             emit iteration(int(percent));
         }
 
@@ -288,17 +303,14 @@ void CalculationManager::process()
 //! set time elapsed for FFT Calculation in seconds
 void CalculationManager::setSpeed(double timeSeconds)
 {
-    d_ptr->speed = timeSeconds;
+    Q_D(CalculationManager);
+    d->speed = timeSeconds;
 }
 
 /*! time elapsed for FFT Calculation in seconds */
 double CalculationManager::speed() const
 {
-    return d_ptr->speed;
+    Q_D(const CalculationManager);
+    return d->speed;
 }
 
-/*! provide size of 1D vector or 2D matrix */
-QSize CalculationManager::size() const
-{
-    return d_ptr->size;
-}

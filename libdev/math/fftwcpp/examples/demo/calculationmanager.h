@@ -31,8 +31,7 @@ public:
     void setIterations(size_t N);
 
     void setDimensions(size_t N);
-    size_t dimensions();
-    QSize size();
+    size_t dimensions() const;
 
     void setSpeed(double timeSeconds);
     double speed() const;

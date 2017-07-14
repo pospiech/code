@@ -197,6 +197,10 @@ public:
         return data;
     }
 
+    /* ********************************************************************************************
+     * *** Forward 1D *****************************************************************************
+     * ********************************************************************************************/
+
     /*! 1D fwd scalar->complex */
     inline
     void fwd( Complex * dst, const Scalar * src, Index nfft)
@@ -217,13 +221,6 @@ public:
         this->stopClock();
     }
 
-    /*
-    inline
-    void fwd2(Complex * dst, const Complex * src, int n0,int n1)
-    {
-      m_impl.fwd2(dst,src,n0,n1);
-    }
-    */
     /*! 1D fwd vector<type>->vector<complex> */
     template <typename _Input>
     inline
@@ -248,6 +245,54 @@ public:
         fwd(&dst[0],&src[0],src.size());
     }
 
+    /* ********************************************************************************************
+     * *** Forward 2D *****************************************************************************
+     * ********************************************************************************************/
+
+
+    /*! 2D fwd scalar->complex */
+    inline
+    void fwd2( Complex * dst, const Scalar * src, Index nfft1, Index nfft2)
+    {
+        this->startClock();
+        m_impl.fwd2(dst,src,static_cast<int>(nfft1),static_cast<int>(nfft2));
+//        if ( HasFlag(HalfSpectrum) == false)
+//            ReflectSpectrum(dst,nfft);
+        this->stopClock();
+    }
+
+    /*! 2D fwd complex->complex */
+    inline
+    void fwd2( Complex * dst, const Complex * src, Index nfft1, Index nfft2)
+    {
+        this->startClock();
+        m_impl.fwd2(dst,src,static_cast<int>(nfft1),static_cast<int>(nfft2));
+        this->stopClock();
+    }
+
+    /*! 2D fwd vector<type>->vector<complex> */
+    template <typename _Input>
+    inline
+    void fwd2( std::vector<Complex,fftalloc<Complex> > & dst, const vector<_Input,fftalloc<_Input> > & src, Index nfft1, Index nfft2)
+    {
+        dst.resize(src.size());
+        this->fwd2(&dst[0],&src[0], nfft1, nfft2);
+    }
+
+    /*! 2D fwd vector<type>->vector<complex> */
+    template <typename _Input>
+    inline
+    void fwd2( std::vector<Complex> & dst, const std::vector<_Input> & src, Index nfft1, Index nfft2)
+    {
+        dst.resize(src.size());
+        this->fwd2(&dst[0],&src[0], nfft1, nfft2);
+    }
+
+    /* ********************************************************************************************
+     * *** Invers 1D ******************************************************************************
+     * ********************************************************************************************/
+
+
     /*! 1D inv complex->complex */
     inline
     void inv( Complex * dst, const Complex * src, Index nfft)
@@ -270,8 +315,7 @@ public:
         this->stopClock();
     }
 
-
-    /*! 1D fwd vector<complex>->vector<type> */
+    /*! 1D inv vector<complex>->vector<type> */
     template <typename _Output>
     inline
     void inv( std::vector<_Output,fftalloc<_Output> > & dst, const std::vector<Complex,fftalloc<Complex> >& src, Index nfft=-1)
@@ -282,7 +326,7 @@ public:
         inv( &dst[0],&src[0],nfft);
     }
 
-    /*! 1D fwd vector<complex>->vector<type> */
+    /*! 1D inv vector<complex>->vector<type> */
     template <typename _Output>
     inline
     void inv( std::vector<_Output> & dst, const std::vector<Complex> & src,Index nfft=-1)
@@ -291,6 +335,54 @@ public:
             nfft = ( NumTraits<_Output>::IsComplex == 0 && HasFlag(HalfSpectrum) ) ? 2*(src.size()-1) : src.size();
         dst.resize( nfft );
         inv( &dst[0],&src[0],nfft);
+    }
+
+    /* ********************************************************************************************
+     * *** Invers 2D ******************************************************************************
+     * ********************************************************************************************/
+
+    /*! 2D inv complex->complex */
+    inline
+    void inv2( Complex * dst, const Complex * src, Index nfft1, Index nfft2)
+    {
+        this->startClock();
+        m_impl.inv2( dst,src,static_cast<int>(nfft1),static_cast<int>(nfft2) );
+        if ( HasFlag( Unscaled ) == false) {
+            const int nfft = nfft1*nfft2;
+            scale(dst,Scalar(1./nfft),nfft); // scale the time series
+        }
+        this->stopClock();
+    }
+
+    /*! 2D inv complex->scalar */
+    inline
+    void inv2( Scalar * dst, const Complex * src, Index nfft1, Index nfft2)
+    {
+        this->startClock();
+        m_impl.inv2( dst,src,static_cast<int>(nfft1),static_cast<int>(nfft2) );
+        if ( HasFlag( Unscaled ) == false) {
+            const int nfft = nfft1*nfft2;
+            scale(dst,Scalar(1./nfft),nfft); // scale the time series
+        }
+        this->stopClock();
+    }
+
+    /*! 2D inv vector<complex>->vector<type> */
+    template <typename _Output>
+    inline
+    void inv2( std::vector<_Output,fftalloc<_Output> > & dst, const std::vector<Complex,fftalloc<Complex> >& src, Index nfft1, Index nfft2)
+    {
+        dst.resize( src.size() );
+        this->inv2( &dst[0],&src[0],nfft1,nfft2);
+    }
+
+    /*! 2D inv vector<complex>->vector<type> */
+    template <typename _Output>
+    inline
+    void inv2( std::vector<_Output> & dst, const std::vector<Complex> & src, Index nfft1, Index nfft2)
+    {
+        dst.resize( src.size() );
+        this->inv2( &dst[0],&src[0],nfft1,nfft2);
     }
 
 

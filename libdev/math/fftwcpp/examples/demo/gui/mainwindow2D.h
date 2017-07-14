@@ -43,9 +43,9 @@ private slots:
     void on_comboBoxFunctionsPhase_currentIndexChanged(int index);
     void on_checkBoxPhaseShift_stateChanged(int state);
     void on_checkBoxPhaseUnwrap_stateChanged(int state);
-    void on_buttonGroupFFTDimension_buttonClicked(int id);
+    void onButtonGroupFFTDimensionButtonClicked(int id);
 
-    void OnFunctionParameterChanged(double value);
+    void onFunctionParameterChanged(double value);
     void getResultsAndPlot();
 
     void on_checkBoxCorrectShiftDisplay_stateChanged(int arg1);

@@ -110,19 +110,20 @@ void MainWindow::setupWidgets()
     buttonGroupFFTDimension->setExclusive(true);
     ui->radioButton1D->setChecked(true);
 
-    connect(buttonGroupFFTDimension, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
-            this, &MainWindow::on_buttonGroupFFTDimension_buttonClicked);
+    connect(this->buttonGroupFFTDimension, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
+            this, &MainWindow::onButtonGroupFFTDimensionButtonClicked);
 
 
-//    on_pushButtonStartFFT_clicked();
+    on_pushButtonStartFFT_clicked();
 
 }
 
 
 
-void MainWindow::on_buttonGroupFFTDimension_buttonClicked(int id)
+void MainWindow::onButtonGroupFFTDimensionButtonClicked(int id)
 {
     this->calculationManager->setDimensions(id);
+    qDebug() << "Dim " << id;
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -239,7 +240,7 @@ void MainWindow::addFunctionParameter(ComplexType type, QBoxLayout * layout, QSt
     }
 
 
-    connect(spinbox, SIGNAL(valueChanged(double)), this, SLOT(OnFunctionParameterChanged(double)), Qt::UniqueConnection);
+    connect(spinbox, SIGNAL(valueChanged(double)), this, SLOT(onFunctionParameterChanged(double)), Qt::UniqueConnection);
 
     hLayout->addWidget(label, 1);
     hLayout->addWidget(spinbox, 3);
@@ -248,7 +249,7 @@ void MainWindow::addFunctionParameter(ComplexType type, QBoxLayout * layout, QSt
 
 }
 
-void MainWindow::OnFunctionParameterChanged(double value)
+void MainWindow::onFunctionParameterChanged(double value)
 {
     // get spinbox
     QDoubleSpinBox *spinbox = qobject_cast<QDoubleSpinBox *>(QObject::sender());
@@ -392,6 +393,7 @@ void MainWindow::startFFT()
 
 void MainWindow::on_comboBoxDataPoints_currentIndexChanged(int index)
 {
+    Q_UNUSED(index);
     updateFunctionParameterSettings();
 }
 
@@ -402,6 +404,7 @@ void MainWindow::updateProgressBar(int percent)
 
 void MainWindow::onDimensionsChanged(size_t N)
 {
+    // rewrite Datapoint List
     for (int i = 0; i < ui->comboBoxDataPoints->count(); ++i) {
         if (N == 1) {
             // text is "64 x 64" shall be "64"
