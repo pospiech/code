@@ -138,6 +138,10 @@ public:
 
         QwtScaleWidget *axis = axisWidget( QwtPlot::yRight );
         axis->setColorMap( zInterval, QColorMap::map(d_mapType) );
+
+        // clear cache, otherwise new data will not be shown on replot
+        d_spectrogram->invalidateCache();
+
     }
 
 
