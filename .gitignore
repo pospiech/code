@@ -78,3 +78,4 @@ bin_debug
 /libdev/math/fftwcpp/fftwcpp.pro.user.510ac9d
 /libdev/qt/qtwidgets/QScienceSpinbox/qscispinbox.pro.user.5104b59
 /libdev/qt/qtwidgets/QScienceSpinbox/*.stash
+*.stash

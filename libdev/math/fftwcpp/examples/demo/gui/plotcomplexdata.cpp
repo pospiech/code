@@ -2,10 +2,12 @@
 //#include "ui_plotcomplexdata.h"
 
 #include <QGridLayout>
+#include <QThread>
 static const double pi = 3.14159265358979323846;
 
 #include "plottools.h"
 #include "phaseunwrap.h"
+#include "layouts.h"
 
 class PlotComplexDataPrivate
 {
@@ -20,6 +22,7 @@ public:
     {
         setSize(QSize(0,0));
         dimension = PlotComplexData::Dimension::undefined;
+        dimensionChanged = false;
     }
 
     vector<double> dataAmplitude;
@@ -30,13 +33,17 @@ public:
     QwtPlot * plot2DAmplitude;
     QwtPlot * plot2DPhase;
 
+    QString plotTitle;
+
     size_t sizeX;
     size_t sizeY;
 
     bool isRemovePhaseFlipping;
+    bool dimensionChanged;
 
     void setSize(QSize size)
     {
+        PlotComplexData::Dimension previousDimension = dimension;
         if (size.height() == 0){
             dimension = PlotComplexData::Dimension::oneDim;
             sizeX = size.width();
@@ -47,6 +54,10 @@ public:
             sizeX = size.width();
             sizeY = size.height();
         }
+        if (previousDimension != dimension)
+            dimensionChanged = true;
+        else
+            dimensionChanged = false;
     }
 };
 
@@ -54,30 +65,40 @@ PlotComplexData::PlotComplexData(QWidget *parent) :
     QWidget(parent),
     d_ptr(new PlotComplexDataPrivate(this))
 {
-//    ui(new Ui::PlotComplexData),
-
-//    ui->setupUi(this);
-
     gridLayoutPlots = new QGridLayout(this);
     gridLayoutPlots->setObjectName(QStringLiteral("gridLayoutPlots"));
-
-
 
     createPlotWidgets(Dimension::oneDim);
 }
 
 PlotComplexData::~PlotComplexData()
 {
-    //    delete ui;
 }
 
 void PlotComplexData::setTitle(QString title)
 {
-//    plot->setTitle( title );
-}
+    Q_D(PlotComplexData);
 
+    if (title.isEmpty())
+        return;
+
+    switch (d->dimension)
+    {
+    case Dimension::oneDim:
+        d->plot1D->setTitle( title );
+        break;
+    case Dimension::twoDim:
+//        gridLayoutPlots->
+        break;
+    case Dimension::undefined:
+        break;
+    }
+    // save in case Dimension was undefined
+    d->plotTitle = title;
+}
 void PlotComplexData::setupLinePlot(QwtPlot * qwtplot)
 {
+
     QLinePlot * plot = dynamic_cast<QLinePlot*>(qwtplot);
     if (!plot)
         qFatal("error casting to QLinePlot");
@@ -118,16 +139,40 @@ void PlotComplexData::setupLinePlot(QwtPlot * qwtplot)
 
     // attach Curve to qwtPlot
     curve1->attach( plot );
-    curve2->attach( plot );
-    plot->replot();
+    curve2->attach( plot );    
 
     // curves must be attached to plot, otherwise
     // nothing is applied.
     plot->setColorPalette(QColorPalette::MSOffice2007);
+
+    plot->replot();
 }
 
-void PlotComplexData::setupMatrixPlot(QwtPlot * plot)
-{
+void PlotComplexData::setupMatrixPlot(QwtPlot * plot, const QString title)
+{    
+    QMatrixPlot * plotMatrix = dynamic_cast<QMatrixPlot*>(plot);
+    if (!plotMatrix)
+        qFatal("error casting to QMatrixPlot");
+
+
+    plotMatrix->setTitle(title);
+    plotMatrix->setAxisTitle (QwtPlot::xBottom, "");
+    plotMatrix->setAxisTitle (QwtPlot::yLeft, "");
+    plotMatrix->setAxisTitle (QwtPlot::yRight, "");
+
+
+    // enable interpolation, otherwise use QwtMatrixRasterData::NearestNeighbour
+    plotMatrix->setResampleMode(QwtMatrixRasterData::NearestNeighbour);
+
+    // enable contour lines
+//    plotMatrix->setContourSteps(11);
+//    plotMatrix->showContour( true );
+
+    // set color map
+    plotMatrix->setColorMap( QColorMap::Jet );
+    plotMatrix->setAutoReplot( true );
+
+    plotMatrix->replot();
 
 }
 
@@ -135,11 +180,9 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
 {
     Q_D(PlotComplexData);
 
-    if (d->dimension != dimension)
+    if (d->dimensionChanged)
     {
-        QLayoutItem *child;
-        while ((child = gridLayoutPlots->takeAt(0)) != 0)
-            delete child;
+        clearLayout(gridLayoutPlots);
 
         // create widgets only on Dimension changes and initially
         switch (dimension)
@@ -154,9 +197,18 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
             d->plot2DPhase = new QMatrixPlot(this);
             gridLayoutPlots->addWidget(d->plot2DAmplitude, 1, 1);
             gridLayoutPlots->addWidget(d->plot2DPhase, 1, 2);
+            setupMatrixPlot(d->plot2DAmplitude, "Amplitude");
+            setupMatrixPlot(d->plot2DPhase, "Phase");
+            break;
+        case Dimension::undefined:
+            qFatal("createPlotWidgets: Dimension must not be undefined");
             break;
         }
+        // reset dimensionChanged
+        d->dimensionChanged = false;
     }
+    // update title if set previously
+    setTitle(d->plotTitle);
 }
 
 vector<double> PlotComplexData::createAxis(size_t length)
@@ -233,22 +285,35 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
         if (!plot2DAmplitude)
             qFatal("error casting to QMatrixPlot");
 
-        plot2DAmplitude->setAxisTitle (QwtPlot::xBottom, "x-axis");
-        plot2DAmplitude->setAxisTitle (QwtPlot::yLeft, "y-axis");
-//        plotMatrix->setAxisTitle (QwtPlot::yRight, "signal amplitude");
-
         plot2DAmplitude->setMatrixData(QVector<double>::fromStdVector(dataAmplitude),
                             xaxis.size(),
                             QwtInterval(xaxis.front(), xaxis.back()),
                             QwtInterval(yaxis.front(), yaxis.back()));
-        plot2DAmplitude->setResampleMode(QwtMatrixRasterData::NearestNeighbour);
-//        plotMatrix->setContourSteps(11);
-//        plotMatrix->showContour( true );
 
+//        plot2DAmplitude->canvas()->setPaintAttribute(QwtPlotCanvas::ImmediatePaint);
+//        plot2DAmplitude->zoomerY1()->setZoomBase(true);
+        QThread::sleep(0.2);
         plot2DAmplitude->replot();
+
+        QMatrixPlot * plot2DPhase = dynamic_cast<QMatrixPlot*>(d->plot2DPhase);
+        if (!plot2DPhase)
+            qFatal("error casting to QMatrixPlot");
+
+        plot2DPhase->setMatrixData(QVector<double>::fromStdVector(dataPhase),
+                            xaxis.size(),
+                            QwtInterval(xaxis.front(), xaxis.back()),
+                            QwtInterval(yaxis.front(), yaxis.back()));
+
+//        plot2DPhase->canvas()->setPaintAttribute(QwtPlotCanvas::ImmediatePaint);
+        QThread::sleep(0.2);
+        plot2DPhase->replot();
+
 
         break;
     }
+    case Dimension::undefined:
+        qFatal("updatePlotData: Dimension must not be undefined");
+        break;
     } // end switch
 
 }

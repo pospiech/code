@@ -138,8 +138,6 @@ public:
 
         QwtScaleWidget *axis = axisWidget( QwtPlot::yRight );
         axis->setColorMap( zInterval, QColorMap::map(d_mapType) );
-
-        setContourSteps(11);
     }
 
 

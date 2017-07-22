@@ -124,6 +124,7 @@ void MainWindow::onButtonGroupFFTDimensionButtonClicked(int id)
 {
     this->calculationManager->setDimensions(id);
     qDebug() << "Dim " << id;
+    startFFT();
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -377,7 +378,11 @@ void MainWindow::startFFT()
     complexFF->setPhaseFunction(functionPhase);
 
     calculationManager->setIterations(iterations);
-    calculationManager->setData(complexFF->complexData(N), MatrixSize);
+    if (dimensions == 1)
+        calculationManager->setData(complexFF->complexData(N), MatrixSize);
+    else
+        calculationManager->setData(complexFF->complexData(N, N), MatrixSize);
+
     calculationManager->moveToThread(thread);
 
     //connect(calculationManager, SIGNAL (error(QString)), this, SLOT (errorString(QString)));

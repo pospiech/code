@@ -26,6 +26,7 @@ public:
         phaseFunction.reset(new NullFunction());
         amplitudeFunction.reset(new OneFunction());
     }
+
     virtual ~ComplexFunctionFactory()
     {
         // necessary for QSharedPointer
@@ -62,14 +63,39 @@ public:
         return phaseFunction->data(N);
     }
 
+    virtual vector<double> amplitudeData(size_t Nx, size_t Ny)
+    {
+        return amplitudeFunction->data(Nx, Ny);
+    }
+
+    virtual vector<double> phaseData(size_t Nx, size_t Ny)
+    {
+        return phaseFunction->data(Nx, Ny);
+    }
+
     vector<complex<double>,fftalloc<complex<double> > > complexData(size_t N)
     {
         vector<double> vAmplitude = this->amplitudeData(N);
         vector<double> vPhase = this->phaseData(N);
-        vector<complex<double>,fftalloc<complex<double> > > vComplex(N);
+        return createComplexFromAmplitudePhase(vAmplitude, vPhase, N );
+    }
 
+    vector<complex<double>,fftalloc<complex<double> > > complexData(size_t Nx, size_t Ny)
+    {
+
+        vector<double> vAmplitude = this->amplitudeData(Nx, Ny);
+        vector<double> vPhase = this->phaseData(Nx, Ny);
+        return createComplexFromAmplitudePhase(vAmplitude, vPhase, Nx*Ny );
+    }
+
+
+private:
+
+    vector<complex<double>,fftalloc<complex<double> > > createComplexFromAmplitudePhase(vector<double> & vAmplitude,  vector<double> & vPhase, size_t N )
+    {
+        vector<complex<double>,fftalloc<complex<double> > > vComplex(N);
         // amplitude must not be negative (polar expects >=0)
-        double minValue = *std::min_element( std::begin(vAmplitude), std::end(vAmplitude) );        
+        double minValue = *std::min_element( std::begin(vAmplitude), std::end(vAmplitude) );
 
         if (minValue <  0){
             // add minValue to vAmplitude
@@ -82,10 +108,9 @@ public:
                        begin(vPhase),   begin(vComplex),
                        [](double a, double p) { return std::polar(a, p); });
         return vComplex;
+
     }
 
-
-private:
     QSharedPointer<FunctionFactory> phaseFunction;
     QSharedPointer<FunctionFactory> amplitudeFunction;
 };

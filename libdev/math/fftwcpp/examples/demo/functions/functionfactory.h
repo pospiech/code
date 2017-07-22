@@ -19,11 +19,17 @@ public:
     }
 
     virtual double function(size_t xi, size_t N) = 0;
+    virtual double function(size_t xi,size_t yi, size_t Nx, size_t Ny) = 0;
 
     virtual vector<double> data(size_t N)
     {
         // create empty vector
-        vector<double> v = vector<double>(N);
+        vector<double> v;
+        try {
+            v = vector<double>(N);
+        } catch (std::bad_alloc const&) {
+            qCritical() << "Memory allocation fail!" << endl;
+        }
         // fill with function
         for(std::vector<int>::size_type xi = 0; xi != N; xi++) {
             v[xi] = function(xi, N);
@@ -31,21 +37,45 @@ public:
         return v;
     }
 
+    virtual vector<double> data(size_t Nx, size_t Ny)
+    {
+        const size_t N = Nx*Ny;
+        // create empty vector
+        vector<double> v;
+        try {
+            v = vector<double>(N);
+        } catch (std::bad_alloc const&) {
+            qCritical() << "Memory allocation fail!" << endl;
+        }
+
+        // fill with function
+        // Array: ( row-major order )
+        for (size_t y = 0; y < Ny; y++) {
+            for (size_t x = 0; x < Nx; x++) {
+                const size_t index = x + Nx * y;
+                v[index] = function(x, y, Nx, Ny);
+            }
+        }
+
+        return v;
+    }
+
+
     virtual QString description() = 0;
-    virtual void parameterChanged() {}
+    virtual void parameterChanged(const QString name) {Q_UNUSED(name);}
 
     virtual void setParameter(const QString name, double value){
 
         if ( ! mapValue.isEmpty() ) {
             if (mapValue.contains(name)) {
                 mapValue[name] = value;
-                parameterChanged();
+                parameterChanged(name);
                 return;
             }
         }
         // value either empty or name not in map
         mapValue.insert(name, value);
-        parameterChanged();
+        parameterChanged(name);
     }
 
     virtual double parameter(const QString name)
@@ -115,6 +145,15 @@ public:
         return 1.0;
     }
 
+    double function(size_t xi,size_t yi, size_t Nx, size_t Ny)
+    {
+        Q_UNUSED(xi);
+        Q_UNUSED(Nx);
+        Q_UNUSED(yi);
+        Q_UNUSED(Ny);
+        return 1.0;
+    }
+
     vector<double> function(size_t N)
     {
         return vector<double>(N, 1);
@@ -138,6 +177,15 @@ public:
     {
         Q_UNUSED(xi);
         Q_UNUSED(N);
+        return 0.0;
+    }
+
+    double function(size_t xi,size_t yi, size_t Nx, size_t Ny)
+    {
+        Q_UNUSED(xi);
+        Q_UNUSED(Nx);
+        Q_UNUSED(yi);
+        Q_UNUSED(Ny);
         return 0.0;
     }
 

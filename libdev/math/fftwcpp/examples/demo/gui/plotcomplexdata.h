@@ -47,7 +47,7 @@ private:
     void createPlotWidgets(PlotComplexData::Dimension dimension);
     vector<double> createAxis(size_t length);
     void setupLinePlot(QwtPlot * plot);
-    void setupMatrixPlot(QwtPlot * plot);
+    void setupMatrixPlot(QwtPlot * plot, const QString title);
 
 
 protected:
