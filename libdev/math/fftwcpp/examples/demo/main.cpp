@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
     // create a new instance of MainWindow
     MainWindow mainWindow;
-    mainWindow.show();
+    mainWindow.showMaximized();
 
     // Enters the main event loop and waits until exit() is called
     // or the main widget is destroyed, and Returns the value that

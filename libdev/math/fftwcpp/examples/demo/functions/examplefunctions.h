@@ -288,8 +288,8 @@ class FresnelLensFunction : public FunctionFactory
 public:
     FresnelLensFunction() : FunctionFactory()
     {
-        setParameter("f", 10);
-        setMin("f", 0);
+        setParameter("f", 100);
+        setMin("f", 100);
         setMax("f", 10000);
 
         k = 2 * pi / lambda;

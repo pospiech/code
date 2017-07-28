@@ -114,6 +114,11 @@ void MainWindow::setupWidgets()
             this, &MainWindow::onButtonGroupFFTDimensionButtonClicked);
 
 
+    ui->checkBoxPhaseUnwrap->setChecked(true);
+    // set state in plot widget
+    plotWidgetList[2]->setRemovePhaseFlipping(true);
+
+
     on_pushButtonStartFFT_clicked();
 
 }
@@ -340,9 +345,10 @@ void MainWindow::on_checkBoxCorrectShiftDisplay_stateChanged(int state)
 
 
 void MainWindow::on_checkBoxPhaseUnwrap_stateChanged(int state)
-{
-    Q_UNUSED(state);
-    // update plot only
+{ 
+    // set state in plot widget
+    plotWidgetList[2]->setRemovePhaseFlipping(static_cast<bool>(state));
+    // update plot
     fftAction doShift = static_cast<fftAction>(calculationManager->shiftBeforeFFT());
     plotWidgetList[2]->updatePlotData(calculationManager->dataInvFourier(doShift), calculationManager->size() );
 }

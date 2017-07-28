@@ -14,9 +14,6 @@ using std::complex;
 #include "fftallocator.h"
 using namespace fftwcpp;
 
-#include "plottools.h"
-
-
 namespace Ui {
 class PlotComplexData;
 }
@@ -40,6 +37,7 @@ public:
     };
 
     void setTitle(QString title);
+    void setRemovePhaseFlipping(bool doRemove);
     void updatePlotData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, QSize size);
     void updatePlotData(vector<double> & dataAmplitude, vector<double> & dataPhase, QSize size);
 

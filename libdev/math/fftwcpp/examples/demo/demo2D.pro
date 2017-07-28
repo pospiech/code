@@ -18,17 +18,7 @@ CONFIG(debug, debug|release):win32:TARGET = $$join(TARGET,,,d)
 
 DEFINES += QWT_DLL
 
-# C:\Users\matthias\Documents\svn\CPP\libdev\math\eigen_fft\fftwcpp\examples\demo
-# C:\Users\matthias\Documents\svn\CPP\libs\qwt-6.1.3
-
-message($${PWD})
-# D:/Git/code/libdev/math/fftwcpp/examples/demo
-# D:/Git/code/../../../../..
-# D:\Git\code\libs\qwt-6.1.3\src
-
-# QWT_PATH = C:/Users/matthias/Documents/svn/CPP/libs/qwt-6.1.3
 QWT_PATH = $${PWD}/../../../../../libs/qwt-6.1.3
-
 
 win32 {
 CONFIG(debug, debug|release):LIBS += -L$${QWT_PATH}/lib/ -lqwtd
@@ -41,17 +31,7 @@ INCLUDEPATH += $${QWT_PATH}/src
 # qwt plot tools
 # #####################################################################
 
-#C:\Git\code\libdev\plot\plottools\trunk\src
-#C:\Git\code\libdev\math\fftwcpp\examples\demo\plottools
-# INCLUDEPATH += $${EXAMPLES_ROOT}../../../plot/plottools/trunk/src
-
-# D:/Git/code/libdev/math/fftwcpp/examples/demo
-# D:/Git/code/libdev/../../../..
-# D:\Git\code\libdev\plot\plottools\trunk\src
-
 INCLUDEPATH += $${PWD}/../../../../plot/plottools/trunk/src
-
-# INCLUDEPATH += C:/Git/code/libdev/plot/plottools/trunk/src
 
 # #####################################################################
 # Includes
@@ -84,7 +64,6 @@ HEADERS += gui/mainwindow2D.h \
     functions/examplefunctions.h \
     functions/complexfunctionfactory.h \
     functions/functionfactory.h \
-    math/sgn.h \
     math/phaseunwrap.h \
     gui/layouts.h \
     gui/plotcomplexdata.h

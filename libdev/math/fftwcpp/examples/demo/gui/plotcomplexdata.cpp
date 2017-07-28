@@ -1,8 +1,8 @@
 #include "plotcomplexdata.h"
-//#include "ui_plotcomplexdata.h"
 
 #include <QGridLayout>
 #include <QThread>
+#include <QLabel>
 static const double pi = 3.14159265358979323846;
 
 #include "plottools.h"
@@ -32,6 +32,7 @@ public:
     QwtPlot * plot1D;
     QwtPlot * plot2DAmplitude;
     QwtPlot * plot2DPhase;
+    QLabel * labelTitle;
 
     QString plotTitle;
 
@@ -88,13 +89,20 @@ void PlotComplexData::setTitle(QString title)
         d->plot1D->setTitle( title );
         break;
     case Dimension::twoDim:
-//        gridLayoutPlots->
+        d->labelTitle->setText( title );
+        d->labelTitle->setAlignment(Qt::AlignHCenter);
         break;
     case Dimension::undefined:
         break;
     }
     // save in case Dimension was undefined
     d->plotTitle = title;
+}
+
+void PlotComplexData::setRemovePhaseFlipping(bool doRemove)
+{
+    Q_D(PlotComplexData);
+    d->isRemovePhaseFlipping = doRemove;
 }
 void PlotComplexData::setupLinePlot(QwtPlot * qwtplot)
 {
@@ -195,8 +203,10 @@ void PlotComplexData::createPlotWidgets(PlotComplexData::Dimension dimension)
         case Dimension::twoDim:
             d->plot2DAmplitude = new QMatrixPlot(this);
             d->plot2DPhase = new QMatrixPlot(this);
-            gridLayoutPlots->addWidget(d->plot2DAmplitude, 1, 1);
-            gridLayoutPlots->addWidget(d->plot2DPhase, 1, 2);
+            d->labelTitle = new QLabel(this);
+            gridLayoutPlots->addWidget(d->labelTitle, 1, 1, 1, 2);
+            gridLayoutPlots->addWidget(d->plot2DAmplitude, 2, 1);
+            gridLayoutPlots->addWidget(d->plot2DPhase, 2, 2);
             setupMatrixPlot(d->plot2DAmplitude, "Amplitude");
             setupMatrixPlot(d->plot2DPhase, "Phase");
             break;
@@ -304,10 +314,10 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
                             QwtInterval(xaxis.front(), xaxis.back()),
                             QwtInterval(yaxis.front(), yaxis.back()));
 
-//        plot2DPhase->canvas()->setPaintAttribute(QwtPlotCanvas::ImmediatePaint);
-        QThread::sleep(0.2);
-        plot2DPhase->replot();
+        plot2DPhase->setInterval( Qt::ZAxis, QwtInterval(-pi, pi) );
+        plot2DPhase->setAxisScale( QwtPlot::yRight, -pi, pi );
 
+        plot2DPhase->replot();
 
         break;
     }
