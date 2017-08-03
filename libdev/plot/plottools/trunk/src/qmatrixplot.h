@@ -144,6 +144,13 @@ public:
 
     }
 
+    void setInterval( Qt::Axis axis, QwtInterval interval )
+    {
+        m_MatrixRasterData->setInterval( axis, interval );
+        // clear cache, otherwise new data will not be shown on replot
+        d_spectrogram->invalidateCache();
+
+    }
 
 public slots:
 
