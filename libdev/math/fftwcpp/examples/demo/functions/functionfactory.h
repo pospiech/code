@@ -26,9 +26,10 @@ public:
         // create empty vector
         vector<double> v;
         try {
-            v = vector<double>(N);
+            v.resize(N);
         } catch (std::bad_alloc const&) {
-            qCritical() << "Memory allocation fail!" << endl;
+            qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+            throw;
         }
         // fill with function
         for(std::vector<int>::size_type xi = 0; xi != N; xi++) {
@@ -43,9 +44,10 @@ public:
         // create empty vector
         vector<double> v;
         try {
-            v = vector<double>(N);
+            v.resize(N);
         } catch (std::bad_alloc const&) {
-            qCritical() << "Memory allocation fail!" << endl;
+            qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+            throw;
         }
 
         // fill with function

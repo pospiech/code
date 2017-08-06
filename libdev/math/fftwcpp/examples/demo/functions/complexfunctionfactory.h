@@ -93,7 +93,15 @@ private:
 
     vector<complex<double>,fftalloc<complex<double> > > createComplexFromAmplitudePhase(vector<double> & vAmplitude,  vector<double> & vPhase, size_t N )
     {
-        vector<complex<double>,fftalloc<complex<double> > > vComplex(N);
+        vector<complex<double>,fftalloc<complex<double> > > vComplex;
+        try {
+            vComplex.resize(N);
+        } catch (std::bad_alloc const&) {
+            qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+            vComplex.resize(0);
+            throw;
+        }
+
         // amplitude must not be negative (polar expects >=0)
         double minValue = *std::min_element( std::begin(vAmplitude), std::end(vAmplitude) );
 

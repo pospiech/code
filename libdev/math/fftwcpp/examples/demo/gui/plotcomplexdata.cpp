@@ -228,7 +228,8 @@ vector<double> PlotComplexData::createAxis(size_t length)
     try {
         axis.resize(length);
     } catch (std::bad_alloc const&) {
-        qCritical() << "Memory allocation fail!" << endl;
+        qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+        throw;
     }
 
     const int halfsize = int(length/2);
@@ -243,97 +244,105 @@ void PlotComplexData::updatePlotData(vector<double> & dataAmplitude, vector<doub
 {
     Q_D(PlotComplexData);
 
-    // set sizeX and sizeY and determine Dimension
-    d->setSize(size);
-    // create plot widgets for Dimension
-    createPlotWidgets(d->dimension);
+    try {
+        // set sizeX and sizeY and determine Dimension
+        d->setSize(size);
+        // create plot widgets for Dimension
+        createPlotWidgets(d->dimension);
 
-    // create x-axis
-    vector<double> xaxis = createAxis(d->sizeX);
-    // also for y-axis
-    vector<double> yaxis;
-    if (d->sizeY > 0)
-        yaxis = createAxis(d->sizeY);
+        // create x-axis
+        vector<double> xaxis = createAxis(d->sizeX);
+        // also for y-axis
+        vector<double> yaxis;
+        if (d->sizeY > 0)
+            yaxis = createAxis(d->sizeY);
 
-    // wrap phase values by 2 pi
-    std::transform(dataPhase.begin(), dataPhase.end(), dataPhase.begin(),
-                   [](double v){return fmod(v, pi*1.00001); }
-    );
+        // wrap phase values by 2 pi
+        std::transform(dataPhase.begin(), dataPhase.end(), dataPhase.begin(),
+                       [](double v){return fmod(v, pi*1.00001); }
+        );
 
-    // remove phase flipping in ifft data if selected
-    if (d->isRemovePhaseFlipping) {
-        removePhaseFlipping(dataPhase);
+        // remove phase flipping in ifft data if selected
+        if (d->isRemovePhaseFlipping) {
+            removePhaseFlipping(dataPhase);
+        }
+        // manual scale: for amplitude (Phase is fixed anyway)
+        double minValue = *std::min_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
+        double maxValue = *std::max_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
+        minValue = std::min(0.0, minValue);
+        if (minValue == maxValue)
+            maxValue = minValue + 1;
+
+        switch (d->dimension)
+        {
+        case Dimension::oneDim:
+        {
+            // create line plot
+            QLinePlot * plot1D = dynamic_cast<QLinePlot*>(d->plot1D);
+            if (!plot1D)
+                qFatal("error casting to QLinePlot");
+
+            // pass data points to graphs:
+            plot1D->curve(0)->setData(xaxis, dataPhase);
+            plot1D->curve(1)->setData(xaxis, dataAmplitude);
+
+            plot1D->setAxisScale(QwtPlot::yLeft,minValue,maxValue * 1.2);
+            plot1D->replot();
+
+            break;
+        }
+        case Dimension::twoDim:
+        {
+            QMatrixPlot * plot2DAmplitude = dynamic_cast<QMatrixPlot*>(d->plot2DAmplitude);
+            if (!plot2DAmplitude)
+                qFatal("error casting to QMatrixPlot");
+
+            plot2DAmplitude->setMatrixData(QVector<double>::fromStdVector(dataAmplitude),
+                                           xaxis.size(),
+                                           QwtInterval(xaxis.front(), xaxis.back()),
+                                           QwtInterval(yaxis.front(), yaxis.back()));
+
+            plot2DAmplitude->replot();
+
+            QMatrixPlot * plot2DPhase = dynamic_cast<QMatrixPlot*>(d->plot2DPhase);
+            if (!plot2DPhase)
+                qFatal("error casting to QMatrixPlot");
+
+            plot2DPhase->setMatrixData(QVector<double>::fromStdVector(dataPhase),
+                                       xaxis.size(),
+                                       QwtInterval(xaxis.front(), xaxis.back()),
+                                       QwtInterval(yaxis.front(), yaxis.back()));
+
+            plot2DPhase->setInterval( Qt::ZAxis, QwtInterval(-pi, pi) );
+            plot2DPhase->setAxisScale( QwtPlot::yRight, -pi, pi );
+
+            plot2DPhase->replot();
+
+            break;
+        }
+        case Dimension::undefined:
+            qFatal("updatePlotData: Dimension must not be undefined");
+            break;
+        } // end switch
+    } catch (std::bad_alloc const&) {
+        qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+        throw;
     }
-    // manual scale: for amplitude (Phase is fixed anyway)
-    double minValue = *std::min_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-    double maxValue = *std::max_element( std::begin(dataAmplitude), std::end(dataAmplitude) );
-    minValue = std::min(0.0, minValue);
-    if (minValue == maxValue)
-        maxValue = minValue + 1;
-
-    switch (d->dimension)
-    {
-    case Dimension::oneDim:
-    {
-        // create line plot
-        QLinePlot * plot1D = dynamic_cast<QLinePlot*>(d->plot1D);
-        if (!plot1D)
-            qFatal("error casting to QLinePlot");
-
-        // pass data points to graphs:
-        plot1D->curve(0)->setData(xaxis, dataPhase);
-        plot1D->curve(1)->setData(xaxis, dataAmplitude);
-
-        plot1D->setAxisScale(QwtPlot::yLeft,minValue,maxValue * 1.2);
-        plot1D->replot();
-
-        break;
-    }
-    case Dimension::twoDim:
-    {
-        QMatrixPlot * plot2DAmplitude = dynamic_cast<QMatrixPlot*>(d->plot2DAmplitude);
-        if (!plot2DAmplitude)
-            qFatal("error casting to QMatrixPlot");
-
-        plot2DAmplitude->setMatrixData(QVector<double>::fromStdVector(dataAmplitude),
-                            xaxis.size(),
-                            QwtInterval(xaxis.front(), xaxis.back()),
-                            QwtInterval(yaxis.front(), yaxis.back()));
-
-//        plot2DAmplitude->canvas()->setPaintAttribute(QwtPlotCanvas::ImmediatePaint);
-//        plot2DAmplitude->zoomerY1()->setZoomBase(true);
-        QThread::sleep(0.2);
-        plot2DAmplitude->replot();
-
-        QMatrixPlot * plot2DPhase = dynamic_cast<QMatrixPlot*>(d->plot2DPhase);
-        if (!plot2DPhase)
-            qFatal("error casting to QMatrixPlot");
-
-        plot2DPhase->setMatrixData(QVector<double>::fromStdVector(dataPhase),
-                            xaxis.size(),
-                            QwtInterval(xaxis.front(), xaxis.back()),
-                            QwtInterval(yaxis.front(), yaxis.back()));
-
-        plot2DPhase->setInterval( Qt::ZAxis, QwtInterval(-pi, pi) );
-        plot2DPhase->setAxisScale( QwtPlot::yRight, -pi, pi );
-
-        plot2DPhase->replot();
-
-        break;
-    }
-    case Dimension::undefined:
-        qFatal("updatePlotData: Dimension must not be undefined");
-        break;
-    } // end switch
-
 }
 
 
 void PlotComplexData::updatePlotData(const std::vector<complex<double>,fftalloc<complex<double> > > & data, QSize size)
 {
     size_t N = data.size();
-    vector<double> dataAmplitude(N);
-    vector<double> dataPhase(N);
+    vector<double> dataAmplitude;
+    vector<double> dataPhase;
+    try {
+        dataAmplitude.resize(N);
+        dataPhase.resize(N);
+    } catch (std::bad_alloc const&) {
+        qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+        throw;
+    }
 
     for(std::vector<complex<double> >::size_type i = 0; i != data.size(); i++) {
         dataAmplitude[i] = abs(data[i]);

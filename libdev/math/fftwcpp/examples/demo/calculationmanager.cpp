@@ -51,8 +51,16 @@ public:
     void setDataSize(size_t N)
     {
         this->N = N;
-        dataFwdFourier.resize(N);
-        dataInvFourier.resize(N);
+        try {
+            dataFwdFourier.resize(N);
+            dataInvFourier.resize(N);
+        } catch (std::bad_alloc const&) {
+            qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+            dataFwdFourier.resize(0);
+            dataInvFourier.resize(0);
+            throw;
+        }
+
     }
 
     //! set size of 1D vector or 2D Matrix
@@ -249,50 +257,57 @@ void CalculationManager::process()
     const clock_t clockStart=clock();
     double percent = 0;
 
-    if (!d->is2D)
-    {
-        if (d->doShiftBeforeFFT)
-            ifftshift(d->dataOriginal);
-
-        // forward FFT;
-        d->fft.fwd(d->dataFwdFourier, d->dataOriginal);
-
-        for (size_t i = 0; i < d->iterations; ++i)
+    try {
+        if (!d->is2D)
         {
-            if (i>0) {
-                // forward FFT; input is last invers FFT
-                d->fft.fwd(d->dataFwdFourier, d->dataInvFourier);
+            if (d->doShiftBeforeFFT)
+                ifftshift(d->dataOriginal);
+
+            // forward FFT;
+            d->fft.fwd(d->dataFwdFourier, d->dataOriginal);
+
+            for (size_t i = 0; i < d->iterations; ++i)
+            {
+                if (i>0) {
+                    // forward FFT; input is last invers FFT
+                    d->fft.fwd(d->dataFwdFourier, d->dataInvFourier);
+                }
+
+                // invers FFT;
+                d->fft.inv(d->dataInvFourier, d->dataFwdFourier);
+
+                percent = double(i+1)/(d->iterations)*100;
+                emit iteration(int(percent));
+            }
+        }
+        else { // 2D
+            if (d->doShiftBeforeFFT)
+                ifftshift(d->dataOriginal, d->size.width(), d->size.height());
+
+            // forward FFT;
+            d->fft.fwd2(d->dataFwdFourier, d->dataOriginal, d->size.width(), d->size.height());
+
+            for (size_t i = 0; i < d->iterations; ++i)
+            {
+                if (i>0) {
+                    // forward FFT; input is last invers FFT
+                    d->fft.fwd2(d->dataFwdFourier, d->dataInvFourier, d->size.width(), d->size.height());
+                }
+
+                // invers FFT;
+                d->fft.inv2(d->dataInvFourier, d->dataFwdFourier, d->size.width(), d->size.height());
+
+                percent = double(i+1)/(d->iterations)*100;
+                emit iteration(int(percent));
             }
 
-            // invers FFT;
-            d->fft.inv(d->dataInvFourier, d->dataFwdFourier);
-
-            percent = double(i+1)/(d->iterations)*100;
-            emit iteration(int(percent));
-        }
-    }
-    else { // 2D
-        if (d->doShiftBeforeFFT)
-            ifftshift(d->dataOriginal, d->size.width(), d->size.height());
-
-        // forward FFT;
-        d->fft.fwd2(d->dataFwdFourier, d->dataOriginal, d->size.width(), d->size.height());
-
-        for (size_t i = 0; i < d->iterations; ++i)
-        {
-            if (i>0) {
-                // forward FFT; input is last invers FFT
-                d->fft.fwd2(d->dataFwdFourier, d->dataInvFourier, d->size.width(), d->size.height());
-            }
-
-            // invers FFT;
-            d->fft.inv2(d->dataInvFourier, d->dataFwdFourier, d->size.width(), d->size.height());
-
-            percent = double(i+1)/(d->iterations)*100;
-            emit iteration(int(percent));
         }
 
+    } catch (const std::exception &e) {
+        qCritical() << "Uncatched Error: " << e.what() << Q_FUNC_INFO << endl;
+        throw;
     }
+
         const clock_t clockEnd=clock();
     // time elapsed for FFT Calculation in seconds
     setSpeed( (double)(clockEnd  - clockStart) / CLOCKS_PER_SEC );

@@ -127,8 +127,11 @@ void MainWindow::setupWidgets()
 
 void MainWindow::onButtonGroupFFTDimensionButtonClicked(int id)
 {
-    this->calculationManager->setDimensions(id);
-    qDebug() << "Dim " << id;
+    // disable phase flipping removal in 2D - freezes application due to high load
+    if (id == 2)
+        ui->checkBoxPhaseUnwrap->setChecked(false);
+
+    this->calculationManager->setDimensions(id);        
     startFFT();
 }
 
@@ -383,17 +386,23 @@ void MainWindow::startFFT()
     complexFF->setAmplitudeFunction(functionAmplitude);
     complexFF->setPhaseFunction(functionPhase);
 
+    try {
+        if (dimensions == 1)
+            calculationManager->setData(complexFF->complexData(N), MatrixSize);
+        else
+            calculationManager->setData(complexFF->complexData(N, N), MatrixSize);
+    } catch (std::bad_alloc const&) {
+        qCritical() << "Memory allocation fail! @" << Q_FUNC_INFO << endl;
+        return;
+    } catch (const std::exception &e) {
+        qCritical() << "Uncatched Error: " << e.what() << Q_FUNC_INFO << endl;
+        throw;
+    }
+
     calculationManager->setIterations(iterations);
-    if (dimensions == 1)
-        calculationManager->setData(complexFF->complexData(N), MatrixSize);
-    else
-        calculationManager->setData(complexFF->complexData(N, N), MatrixSize);
 
     calculationManager->moveToThread(thread);
 
-    //connect(calculationManager, SIGNAL (error(QString)), this, SLOT (errorString(QString)));
-    //connect(calculationManager, SIGNAL (finished()), calculationManager, SLOT (deleteLater()));
-    //connect(thread, SIGNAL (finished()), thread, SLOT (deleteLater()));
 
     cout << "FFT thread started." << endl;
     thread->start();
