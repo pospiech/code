@@ -33,6 +33,7 @@ LIBS += -L$${PROJECT_ROOT}/lib/ximea/x86 -lxiapi32
 # Include directories
 # -------------------------------------------------
 INCLUDEPATH += ../include/
+INCLUDEPATH += camera/
 INCLUDEPATH += $${UI_DIR}
 
 INCLUDEPATH += ../include/QCameraImage/
@@ -40,11 +41,17 @@ INCLUDEPATH += ../include/camera/uEye/
 INCLUDEPATH += ../include/camera/ximea/
 
 HEADERS += \
+    ../include/camera/QRgbMatrix.h \
+    ../include/camera/QCameraImageBase.h \
+    ../include/camera/QCameraImage.h \
     gui/mainwindow.h \
     camera/camerainterface.h \
     camera/cameraximea.h
 
 SOURCES += \
+    ../include/camera/QRgbMatrix.cpp \
+    ../include/camera/QCameraImageBase.cpp \
+    ../include/camera/QCameraImage.cpp \
     main.cpp \
     gui/mainwindow.cpp \
     camera/cameraximea.cpp

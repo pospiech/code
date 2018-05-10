@@ -4,13 +4,19 @@
 #include <memory.h>
 #include <QtDebug>
 #include <QtCore/QRect>
+#include <QString>
+#include <QImage>
+#include <QMutexLocker>
 
 class CameraXimeaPrivate
 {
+public:
     CameraXimeaPrivate()
     {
         memset(&image,0,sizeof(image));
         image.size = sizeof(XI_IMG);
+
+        numberOfDevices();
     }
 
     // structure containing information about incoming image.
@@ -18,10 +24,14 @@ class CameraXimeaPrivate
     XI_IMG image;
 
     // windows handle
-    HANDLE xiH = NULL;
+    HANDLE xiHandle = NULL;
+
+    // camera number and count
+    size_t cameraNumber = 0;
+    size_t cameraCount = 0;
 
     /** handle camera error messages */
-    void errorHandler(int retCode)
+    void errorHandler(int retCode) const
     {
         if (retCode != XI_OK)
         {
@@ -29,13 +39,25 @@ class CameraXimeaPrivate
         }
     }
 
+    /** stores camera Number for futher usage
+     */
+    void setCameraNumber(size_t cameraNumber)
+    {
+        if (cameraNumber <= this->cameraCount) {
+            this->cameraNumber = cameraNumber;
+        }
+        else {
+            qDebug() << "camera number requested higher than maximum attached camera count";
+        }
+
+    }
 
     /** This function initializes the device and returns a device handle.
      */
-    void openCamera()
+    void openCamera(size_t cameraNumber)
     {
         XI_RETURN stat = XI_OK;
-        stat = xiOpenDevice(0, &xiH);
+        stat = xiOpenDevice(static_cast<DWORD>(cameraNumber), &xiHandle);
         errorHandler(stat);
     }
 
@@ -45,26 +67,29 @@ class CameraXimeaPrivate
     void closeCamera()
     {
         XI_RETURN stat = XI_OK;
-        stat = xiCloseDevice(xiH);
+        stat = xiCloseDevice(xiHandle);
         errorHandler(stat);
     }
 
     /** This function enumerates all devices connected and returns the number of discovered devices.
      * It is needed to be called before any other function of API is called by application.
      */
-    int numberOfDevices()
+    size_t numberOfDevices()
     {
-        PDWORD pNumberDevices;
+        PDWORD pNumberDevices = nullptr;
         XI_RETURN stat = xiGetNumberDevices(pNumberDevices);
         errorHandler(stat);
-        int count = static_cast<int>(*pNumberDevices);
+
+        size_t count = static_cast<size_t>(*pNumberDevices);
+        this->cameraCount = count;
+
         return count;
     }
 
     /** This function starts the data acquisition on the devices specified by the handle. */
     void startAcquisition()
     {
-       XI_RETURN stat = xiStartAcquisition(xiH);
+       XI_RETURN stat = xiStartAcquisition(xiHandle);
        errorHandler(stat);
     }
 
@@ -73,7 +98,7 @@ class CameraXimeaPrivate
      */
     void stopAcquisition()
     {
-       XI_RETURN stat = xiStopAcquisition(xiH);
+       XI_RETURN stat = xiStopAcquisition(xiHandle);
        errorHandler(stat);
     }
 
@@ -84,57 +109,50 @@ class CameraXimeaPrivate
      */
     void getImage()
     {
-        const DWORD TimeOut = 5000;
-        XI_RETURN stat = xiGetImage(xiH, TimeOut, &image);
+        const DWORD TimeOut = 1000; // time in ms
+        XI_RETURN stat = xiGetImage(xiHandle, TimeOut, &image);
         errorHandler(stat);
-    }
-
-    /** This function returns selected parameter of camera without opening it.
-     * It allows to quickly get information from each camera in multiple camera setups.
-     */
-    void deviceInfo(size_t DevId=0)
-    {
-        const char* prm;
-        void* val;
-        DWORD * size;
-        XI_PRM_TYPE * type;
-
-        XI_RETURN stat =
-                xiGetDeviceInfoString(
-                    static_cast<DWORD>(DevId), // index of the device
-                    prm,                       // parameter name string
-                    value,                     // pointer to result string
-                    size);                     // size of string
-
-        errorHandler(stat);
-
-//        Note: This function is capable to return only limited set of parameters:
-//        XI_PRM_DEVICE_SN
-//        XI_PRM_DEVICE_NAME
-//        XI_PRM_DEVICE_INSTANCE_PATH
-//        XI_PRM_DEVICE_LOCATION_PATH
-//        XI_PRM_DEVICE_TYPE
     }
 
     /** Sets exposure time in microseconds. */
-    void setExposure(sizt_t exposure_ms)
+    void setExposure(float exposure_ms)
     {
         // Setting "exposure" parameter (10ms=10000us)
-        stat = xiSetParamInt(xiH, XI_PRM_EXPOSURE, 1000*static_cast<int>(exposure_ms));
+        XI_RETURN stat = xiSetParamInt(xiHandle, XI_PRM_EXPOSURE, static_cast<int>(1000 * exposure_ms));
         errorHandler(stat);
+    }
+
+    /** Get exposure time in microseconds. */
+    float exposure() const
+    {
+        int value;
+        XI_RETURN stat = xiGetParamInt(xiHandle, XI_PRM_EXPOSURE, &value);
+        errorHandler(stat);
+        return value / 1000; // us -> ms
     }
 
     /** Sets gain in dB. */
     void setGain(float gain_in_db)
     {
-        errorHandler(xiSetParamFloat(xiH, XI_PRM_GAIN, gain_in_db ));
+        XI_RETURN stat = xiSetParamFloat(xiHandle, XI_PRM_GAIN, gain_in_db );
+        errorHandler(stat);
     }
 
-    void configureBinning(bool enableBinning, Qt::Orientation orientation, int binningPixels)
+    /** gain in dB. */
+    float gain()
+    {
+        float gain_in_db;
+        XI_RETURN stat = xiGetParamFloat(xiHandle, XI_PRM_GAIN, &gain_in_db );
+        errorHandler(stat);
+        return gain_in_db;
+    }
+
+
+    void configureBinning(bool enableBinning, Qt::Orientation orientation, int binningPixels = 2)
     {
         if (enableBinning) {
-            char * binnMode;
-            char * binnOrient;
+            const char * binnMode;
+            const char * binnOrient;
             if (orientation == Qt::Horizontal){
                 binnMode = XI_PRM_BINNING_HORIZONTAL_MODE;
                 binnOrient = XI_PRM_BINNING_HORIZONTAL;
@@ -145,11 +163,10 @@ class CameraXimeaPrivate
             //  Sets the mode to use to combine vertical pixel together.
             // XI_BIN_MODE_SUM     0	increased sensitivity.
             // XI_BIN_MODE_AVERAGE	1	increased signal/noise ratio.
-            errorHandler(xiSetParamInt(xiH, XI_PRM_BINNING_VERTICAL_MODE, XI_BIN_MODE_AVERAGE));
+            errorHandler(xiSetParamInt(xiHandle, binnMode, XI_BIN_MODE_AVERAGE));
 
-            // Defines number of vertical photo-sensitive cells to combine.
-            int binningPixels = 2;
-            errorHandler(xiSetParamInt(xiH, XI_PRM_BINNING_VERTICAL, binningPixels));
+            // Defines number of vertical photo-sensitive cells to combine.            
+            errorHandler(xiSetParamInt(xiHandle, binnOrient, binningPixels));
         }
     }
 
@@ -161,38 +178,78 @@ class CameraXimeaPrivate
     {
         // XI_MONO8
         // XI_MONO16
-        errorHandler(xiSetParamInt(xiH, XI_PRM_IMAGE_DATA_FORMAT,
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_IMAGE_DATA_FORMAT,
                                    static_cast<XI_IMG_FORMAT>(formatCode)));
     }
 
     /** set ROI using offets and width and height */
     void setROI(QRect roi)
     {
-        errorHandler(xiSetParamInt(xiH, XI_PRM_OFFSET_X, roi.x()));
-        errorHandler(xiSetParamInt(xiH, XI_PRM_OFFSET_Y, roi.y()));
-        errorHandler(xiSetParamInt(xiH, XI_PRM_WIDTH, roi.width()));
-        errorHandler(xiSetParamInt(xiH, XI_PRM_HEIGHT, roi.height()));
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_X, roi.x()));
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_Y, roi.y()));
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_WIDTH, roi.width()));
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_HEIGHT, roi.height()));
     }
 
-    void getParamters()
+    /** This function returns selected parameter of camera without opening it.
+     * It allows to quickly get information from each camera in multiple camera setups.
+     */
+    QString deviceInfo(size_t DevId=0, const char* parameter = XI_PRM_DEVICE_SN)
     {
-        // device sensor id as number
-        int sensor_id;
-        //!  Returns the device model id.
-        errorHandler(xiGetParamInt(handle, XI_PRM_DEVICE_MODEL_ID, &model_id));
+        //        Note: This function is capable to return only limited set of parameters:        
+        // XI_PRM_DEVICE_SN:
+        // XI_PRM_DEVICE_NAME:
+        // XI_PRM_DEVICE_INSTANCE_PATH:
+        // XI_PRM_DEVICE_LOCATION_PATH:
+        // XI_PRM_DEVICE_TYPE:
 
-        //! Returns the device sensor model id.
-        errorHandler(xiGetParamInt(handle, XI_PRM_SENSOR_MODEL_ID, &sensor_id));
+        char value[100];
+        DWORD size = 100;
 
-        //! Returns device serial number. Only string form is possible.
-        //! It might contain also alphabet characters.
-        char sn[20]=0;
-        errorHandler(xiGetParamString(xiH, XI_PRM_DEVICE_SN, sn, sizeof(sn)));
+        XI_RETURN stat =
+                xiGetDeviceInfoString(
+                    static_cast<DWORD>(DevId), // index of the device
+                    parameter,                 // parameter name string
+                    value,                     // pointer to result string
+                    size);                     // size of string
 
+        errorHandler(stat);
+
+        return QString::fromLocal8Bit(value, static_cast<int>(size));
+    }
+
+    /** get parameters of camera, results are in QMap */
+    QMap<QString, QString> getParamters()
+    {
+        QMap<QString, QString> mapParam;
+        try{
+            //!  Returns the device model id.
+            // device model id as number
+            int model_id;
+            errorHandler(xiGetParamInt(xiHandle, XI_PRM_DEVICE_MODEL_ID, &model_id));
+            mapParam.insert("ModelID", QString().arg(model_id));
+
+            //! Returns the device sensor model id.
+            // device sensor id as number
+            int sensor_id;
+            errorHandler(xiGetParamInt(xiHandle, XI_PRM_SENSOR_MODEL_ID, &sensor_id));
+            mapParam.insert("SensorID", QString().arg(sensor_id));
+
+            //! Returns device serial number. Only string form is possible.
+            //! It might contain also alphabet characters.
+            char sn[20];
+            errorHandler(xiGetParamString(xiHandle, XI_PRM_DEVICE_SN, sn, sizeof(sn)));
+            mapParam.insert("DeviceSN", QString(sn));
+        }
+        catch(const std::exception& e)
+        {
+            qDebug() << "Error:" << e.what();
+        }
+        return mapParam;
     }
 
     //! Setting the API debug level allows to select amount of messages stored to debug output.
-    void setDebugLevel(size_t level)
+    void setDebugLevel(XI_DEBUG_LEVEL level)
     {
 //        type	representing value	result
 //        XI_DL_DETAIL	0	Prints same as XI_DL_TRACE plus locking of resources
@@ -201,11 +258,122 @@ class CameraXimeaPrivate
 //        XI_DL_ERROR     3	Prints all errors
 //        XI_DL_FATAL     4	Prints only important errors
 //        XI_DL_DISABLED	100	Prints no messages
-        xiSetParamInt(xiH, XI_PRM_DEBUG_LEVEL, XI_DL_TRACE);
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_DEBUG_LEVEL, level));
     }
 };
 
+
+
+
 CameraXimea::CameraXimea()
+    : d_ptr(new CameraXimeaPrivate)
 {
 
+}
+/** Initialize - find number of devices and return first camera */
+bool CameraXimea::Initialize()
+{
+    Q_D(CameraXimea);
+    size_t count = d->cameraCount;
+    if (count > 0){
+        d->setCameraNumber(1);
+        return true;
+    }
+    else{
+        return false;
+    }
+
+}
+
+void CameraXimea::openCamera()
+{
+    Q_D(CameraXimea);
+    d->openCamera(d->cameraNumber);
+}
+
+void CameraXimea::closeCamera()
+{
+    Q_D(CameraXimea);
+    d->closeCamera();
+}
+
+float CameraXimea::exposure() const
+{
+    Q_D(const CameraXimea);
+    return d->exposure();
+}
+
+void CameraXimea::setExposure(float exposure_ms)
+{
+    Q_D(CameraXimea);
+    d->setExposure(exposure_ms);
+}
+
+void CameraXimea::capture()
+{
+    Q_D(CameraXimea);
+    d->startAcquisition();
+    d->getImage();
+    d->stopAcquisition();
+    int sizeX = static_cast<int>(d->image.width);
+    int sizeY = static_cast<int>(d->image.height);
+
+    XI_IMG_FORMAT format = d->image.frm;
+
+    QImage image = this->toQImage(d->image.bp, d->image.bp_size, format, sizeX, sizeY);
+}
+
+void CameraXimea::updateImageData(QImage& nextImage)
+{
+    QMutexLocker locker(&mutex);
+    this->lastImage = nextImage;
+}
+
+QImage CameraXimea::image()
+{
+    QMutexLocker locker(&mutex);
+    return this->lastImage;
+}
+
+
+QImage CameraXimea::toQImage(void * pMemVoid, size_t size, int format, int sizeX, int sizeY)
+{
+
+    // Determine Image Format
+    QImage::Format qFormat = QImage::Format_Invalid;
+    switch (static_cast<XI_IMG_FORMAT>(format))
+    {
+    case XI_MONO8: // 8 bits per pixel
+    case XI_MONO16: // 16 bits per pixel
+          qFormat = QImage::Format_Mono;
+    }
+    if (qFormat == QImage::Format_Invalid)
+        qFatal("invalid image Format");
+
+    // convert / copy pointer data into vector
+    std::vector<int> grayVector(size);
+    if (static_cast<XI_IMG_FORMAT>(format) == XI_MONO16)
+    {
+        qint16* imageIterator = reinterpret_cast<qint16*> (pMemVoid);
+        for (size_t count = 0; count < size; ++count)
+        {
+            grayVector[count] = static_cast<int>(*imageIterator);
+            imageIterator++;
+        }
+    }
+
+    // convert gray values into QImage data
+    QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), qFormat);
+    for ( int y = 0; y < sizeY; ++y )
+    {
+        int yoffset = sizeY*y;
+        QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(y)) ;
+        for ( int x = 0; x < sizeX  ; ++x )
+        {
+            int pos = x + yoffset;
+            int color = grayVector[static_cast<size_t>(pos)];
+            *line++ = qRgb(color, color, color);
+        }
+    }
+    return image;
 }
