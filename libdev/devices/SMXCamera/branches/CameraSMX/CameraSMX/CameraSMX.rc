@@ -1,0 +1,231 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Deutsch (Deutschland) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)\r\n"
+    "LANGUAGE 7, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\CameraSMX.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""     // Standardkomponenten\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\CameraSMX.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CAMERASMX_DIALOG DIALOGEX 0, 0, 378, 278
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "CameraSMX"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Close",IDC_BUTTON_CLOSE,7,6,60,16
+    LTEXT           "",IDC_STATIC_CAMERA,7,26,212,164
+    PUSHBUTTON      "Get Snapshot",IDC_BUTTON_GETFRAME,69,6,60,16
+    PUSHBUTTON      "Camera Settings",IDC_BUTTON_SETUP_CAMERA,129,6,80,16
+END
+
+IDD_DIALOG_SMXCAMERA_SETTINGS DIALOGEX 0, 0, 501, 177
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Camera Settings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Close",IDOK,391,156,50,14
+    LTEXT           "Frequenz:",IDC_STATIC,7,24,71,10
+    COMBOBOX        IDC_COMBO_FREQ,83,23,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Gain:",IDC_STATIC,7,40,71,10
+    COMBOBOX        IDC_COMBO_GAIN,83,38,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Decimation:",IDC_STATIC,7,55,71,10
+    COMBOBOX        IDC_COMBO_DECIMATION,83,54,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Brightness:",IDC_STATIC,7,72,71,10
+    LTEXT           "Contrast:",IDC_STATIC,7,88,71,10
+    EDITTEXT        IDC_EDIT_BRIGHT,83,70,68,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_CONTRAST,83,86,68,12,ES_AUTOHSCROLL
+    LTEXT           "Gamma:",IDC_STATIC,7,104,71,10
+    EDITTEXT        IDC_EDIT_GAMMA,83,103,68,12,ES_AUTOHSCROLL
+    LTEXT           "Color Depth:",IDC_STATIC,7,120,71,10
+    COMBOBOX        IDC_COMBO_COLORDEPTH,83,119,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Bit:",IDC_STATIC,7,136,71,10
+    COMBOBOX        IDC_COMBO_BITDEPTH,83,134,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Bayer Algorithmus:",IDC_STATIC,7,152,71,10
+    COMBOBOX        IDC_COMBO_BAYER_ALG,83,150,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Devicename:",IDC_STATIC,7,9,71,10
+    EDITTEXT        IDC_EDIT_DEVICENAME,83,7,68,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Sensor Width:",IDC_STATIC,176,25,63,10
+    EDITTEXT        IDC_EDIT_MAXFRAMEWIDTH,247,22,68,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Sensor Height:",IDC_STATIC,176,40,63,10
+    EDITTEXT        IDC_EDIT_MAXFRAMEHEIGTH,247,38,68,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Mirror X:",IDC_STATIC,176,121,63,10
+    COMBOBOX        IDC_COMBO_MIRROR_X,247,118,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Mirror Y:",IDC_STATIC,176,137,63,10
+    COMBOBOX        IDC_COMBO_MIRROR_Y,247,135,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Apply",IDC_BUTTON_SETTINGS_APPLY,444,156,50,14
+    LTEXT           "Exposure Snapshot:",IDC_STATIC,335,23,81,10
+    EDITTEXT        IDC_EDIT_EXP_SNAP,421,21,68,12,ES_AUTOHSCROLL
+    LTEXT           "Exposure Snapshot Ms:",IDC_STATIC,335,39,81,10
+    EDITTEXT        IDC_EDIT_EXP_SNAP_MS,421,37,68,12,ES_AUTOHSCROLL
+    LTEXT           "Exposure Video:",IDC_STATIC,335,55,81,10
+    EDITTEXT        IDC_EDIT_EXP_VIDEO,421,53,68,12,ES_AUTOHSCROLL
+    LTEXT           "Exposure Vidoe Ms:",IDC_STATIC,335,71,81,10
+    EDITTEXT        IDC_EDIT_EXP_VIDEO_MS,421,69,68,12,ES_AUTOHSCROLL
+    LTEXT           "Exp. Snapshot Multi:",IDC_STATIC,335,87,81,10
+    LTEXT           "Fenster (X-Start):",IDC_STATIC,176,55,63,10
+    EDITTEXT        IDC_EDIT_START_X,247,54,68,12,ES_AUTOHSCROLL
+    LTEXT           "Fenster (Breite):",IDC_STATIC,176,71,63,10
+    EDITTEXT        IDC_EDIT_WIDTH_X,247,70,68,12,ES_AUTOHSCROLL
+    LTEXT           "Fenster (Y-Start):",IDC_STATIC,176,87,63,10
+    EDITTEXT        IDC_EDIT_START_Y,247,86,68,12,ES_AUTOHSCROLL
+    LTEXT           "Fenster (Höhe):",IDC_STATIC,176,103,63,10
+    EDITTEXT        IDC_EDIT_HEIGHT_Y,247,102,68,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_COMBO_EXP_MULTI,421,85,68,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040704e4"
+        BEGIN
+            VALUE "CompanyName", "TODO: <Firmenname>"
+            VALUE "FileDescription", "TODO: <Dateibeschreibung>"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "CameraSMX.exe"
+            VALUE "LegalCopyright", "TODO: (c) <Firmenname>. Alle Rechte vorbehalten."
+            VALUE "OriginalFilename", "CameraSMX.exe"
+            VALUE "ProductName", "TODO: <Produktname>"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x407, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_CAMERASMX_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 371
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 271
+    END
+
+    IDD_DIALOG_SMXCAMERA_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 494
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 170
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Deutsch (Deutschland) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+LANGUAGE 7, 1
+#pragma code_page(1252)
+#include "res\CameraSMX.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"     // Standardkomponenten
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

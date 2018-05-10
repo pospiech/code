@@ -1,0 +1,129 @@
+#ifndef QSMXDLL_H
+#define QSMXDLL_H
+
+#include "QCameraSMXGlobal.h"
+
+#include <QtCore/QLibrary>
+#include "SMX150.h"
+
+#define DLLPOINTERTOFUNCTION(name) name##_t name
+
+
+class QSMXCAMERA_EXPORT QSMXDLL : public QLibrary
+{
+public:
+    QSMXDLL(QObject *parent = 0, bool loadDll = false);
+    virtual ~QSMXDLL();
+    bool loadDLL(QString filename = "SMX150.dll");
+
+public:
+
+    DLLPOINTERTOFUNCTION(CxOpenDevice);
+    DLLPOINTERTOFUNCTION(CxCloseDevice);
+
+    DLLPOINTERTOFUNCTION(CxGetCameraInfo);
+    DLLPOINTERTOFUNCTION(CxGetCameraInfoEx);
+
+    DLLPOINTERTOFUNCTION(CxGetStreamMode);
+    DLLPOINTERTOFUNCTION(CxSetStreamMode);
+
+    DLLPOINTERTOFUNCTION(CxGetScreenParams);
+    DLLPOINTERTOFUNCTION(CxSetScreenParams);
+    DLLPOINTERTOFUNCTION(CxActivateScreenParams);
+
+    DLLPOINTERTOFUNCTION(CxGetFrequency);
+    DLLPOINTERTOFUNCTION(CxSetFrequency);
+
+    DLLPOINTERTOFUNCTION(CxGetExposureMinMax);
+    DLLPOINTERTOFUNCTION(CxGetExposure);
+    DLLPOINTERTOFUNCTION(CxSetExposure);
+
+    DLLPOINTERTOFUNCTION(CxGetExposureMinMaxMs);
+    DLLPOINTERTOFUNCTION(CxGetExposureMs);
+    DLLPOINTERTOFUNCTION(CxSetExposureMs);
+
+    DLLPOINTERTOFUNCTION(CxSetGain);
+    DLLPOINTERTOFUNCTION(CxGetGain);
+
+    DLLPOINTERTOFUNCTION(CxGrabVideoFrame);
+    DLLPOINTERTOFUNCTION(CxGetFramePtr);
+
+    DLLPOINTERTOFUNCTION(CxSetBrightnessContrastGamma);
+    DLLPOINTERTOFUNCTION(CxSetConvertionTab);
+    DLLPOINTERTOFUNCTION(CxGetConvertionTab);
+    DLLPOINTERTOFUNCTION(CxSetDefaultConvertionTab);
+
+    DLLPOINTERTOFUNCTION(CxStartVideo);
+    DLLPOINTERTOFUNCTION(CxStopVideo);
+    DLLPOINTERTOFUNCTION(CxSetBayerAlg);
+    DLLPOINTERTOFUNCTION(CxBayerToRgb);
+
+    DLLPOINTERTOFUNCTION(CxGetFrameCounter);
+
+    DLLPOINTERTOFUNCTION(CxGetSnapshotExposureMinMax);
+    DLLPOINTERTOFUNCTION(CxGetSnapshotExposure);
+    DLLPOINTERTOFUNCTION(CxSetSnapshotExposure);
+
+    DLLPOINTERTOFUNCTION(CxGetSnapshotExposureMinMaxMs);
+    DLLPOINTERTOFUNCTION(CxGetSnapshotExposureMs);
+    DLLPOINTERTOFUNCTION(CxSetSnapshotExposureMs);
+
+    DLLPOINTERTOFUNCTION(CxSetSnapshotExposureMultiplier);
+    DLLPOINTERTOFUNCTION(CxGetSnapshotExposureMultiplier);
+
+    DLLPOINTERTOFUNCTION(CxSetMultipleSnapshotExposure);
+    DLLPOINTERTOFUNCTION(CxGetMultipleSnapshotExposure);
+    DLLPOINTERTOFUNCTION(CxSetMultipleSnapshotExposureMs);
+    DLLPOINTERTOFUNCTION(CxGetMultipleSnapshotExposureMs);
+
+    DLLPOINTERTOFUNCTION(CxGetSnapshot);
+    DLLPOINTERTOFUNCTION(CxCancelSnapshot);
+
+    DLLPOINTERTOFUNCTION(CxGetDACRawOffset);
+    DLLPOINTERTOFUNCTION(CxSetDACRawOffset);
+    DLLPOINTERTOFUNCTION(CxGetDACFineOffset);
+    DLLPOINTERTOFUNCTION(CxSetDACFineOffset);
+
+    DLLPOINTERTOFUNCTION(CxSetContinuousPrecharge);
+    DLLPOINTERTOFUNCTION(CxGetContinuousPrecharge);
+
+    DLLPOINTERTOFUNCTION(CxSetTristateOut);
+    DLLPOINTERTOFUNCTION(CxGetTristateOut);
+
+    DLLPOINTERTOFUNCTION(CxElectricalBlack);
+
+    DLLPOINTERTOFUNCTION(CxWriteSensorReg);
+    DLLPOINTERTOFUNCTION(CxReadSensorReg);
+
+    DLLPOINTERTOFUNCTION(CxSetControlReg);
+    DLLPOINTERTOFUNCTION(CxGetControlReg);
+
+    DLLPOINTERTOFUNCTION(CxSet10BitsOutput);
+    DLLPOINTERTOFUNCTION(CxGet10BitsOutput);
+
+    DLLPOINTERTOFUNCTION(CxSetLineBlank);
+    DLLPOINTERTOFUNCTION(CxGetLineBlank);
+
+    DLLPOINTERTOFUNCTION(CxSetHBlank);
+    DLLPOINTERTOFUNCTION(CxGetHBlank);
+
+    DLLPOINTERTOFUNCTION(CxSetFrameRate);
+    DLLPOINTERTOFUNCTION(CxGetFrameRate);
+
+    DLLPOINTERTOFUNCTION(CxSetMaxFrameRate);
+    DLLPOINTERTOFUNCTION(CxSetDefaultFrameRate);
+
+    DLLPOINTERTOFUNCTION(CxSetVDDC);
+    DLLPOINTERTOFUNCTION(CxGetVDDC);
+
+    DLLPOINTERTOFUNCTION(CxSetVDDH);
+    DLLPOINTERTOFUNCTION(CxGetVDDH);
+
+    DLLPOINTERTOFUNCTION(CxSetADCSampleDelay);
+    DLLPOINTERTOFUNCTION(CxGetADCSampleDelay);
+
+    DLLPOINTERTOFUNCTION(CxGetStatistics);
+
+};
+
+#endif // QSMXDLL_H
