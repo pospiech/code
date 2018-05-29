@@ -16,7 +16,9 @@ TEMPLATE = app
 # CONFIG += warn_on
 # CONFIG += thread
 
-QT       += core gui
+QT += core
+QT += gui
+QT += gui-private
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 # The following define makes your compiler emit warnings if you use

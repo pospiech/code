@@ -2,14 +2,13 @@
 #define CAMERAXIMEA_H
 
 #include <QObject>
-#include <QMutex>
 #include "camerainterface.h"
 
 #include<QtCore/QScopedPointer>
 
 class CameraXimeaPrivate;
 
-class CameraXimea : public CameraInterface, QObject
+class CameraXimea : public QObject, CameraInterface
 {
      Q_OBJECT
 public:
@@ -28,7 +27,7 @@ public:
     void capture();
 
     QRect roi() const;
-    void setROI(QRect roi);
+    void setROI(QRect roi);    
 
     bool Initialize();
 
@@ -40,12 +39,6 @@ protected:
 private:
     // requires d_ptr
     Q_DECLARE_PRIVATE(CameraXimea)
-
-    QImage toQImage(void * pImage, size_t size, int format, int sizeX, int sizeY);
-
-    QImage lastImage;
-    QMutex mutex;
-    void updateImageData(QImage& nextImage);
 
 };
 

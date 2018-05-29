@@ -4,15 +4,15 @@ PROJECT_ROOT = ..
 # #####################################################################
 # Directories
 # #####################################################################
-BIN_DIR = $${PROJECT_ROOT}/lib
+BIN_DIR = $${PROJECT_ROOT}/bin
 debug:DESTDIR = $${BIN_DIR}/debug/
 release:DESTDIR = $${BIN_DIR}/release/
 
-BUILD_DIR = build
+BUILD_DIR = $${PROJECT_ROOT}/build
 debug:OBJECTS_DIR = $${BUILD_DIR}/debug/
 release:OBJECTS_DIR = $${BUILD_DIR}/release/
 
-EXAMPLE_DIR = ../example/bin
+EXAMPLE_DIR = $${PROJECT_ROOT}/bin
 debug:DLLDESTDIR = $${EXAMPLE_DIR}/debug/
 release:DLLDESTDIR = $${EXAMPLE_DIR}/release/
 
@@ -27,31 +27,33 @@ UI_DIR = $${BUILD_DIR}/ui
 # Libaries
 # -------------------------------------------------
 # LIBS += -L$${PROJECT_ROOT}/lib/uEye -luEye_api
-LIBS += -L$${PROJECT_ROOT}/lib/ximea/x86 -lxiapi32
-
+# LIBS += -L$${PROJECT_ROOT}/lib/ximea/x86 -lxiapi32.dll
+win32-g++:LIBS += $${PROJECT_ROOT}/lib/ximea/x86/xiapi32.dll
 # -------------------------------------------------
 # Include directories
 # -------------------------------------------------
 INCLUDEPATH += ../include/
+INCLUDEPATH += gui/
 INCLUDEPATH += camera/
+INCLUDEPATH += camera/QCameraImage/
 INCLUDEPATH += $${UI_DIR}
 
-INCLUDEPATH += ../include/QCameraImage/
 INCLUDEPATH += ../include/camera/uEye/
 INCLUDEPATH += ../include/camera/ximea/
 
+
 HEADERS += \
-    ../include/camera/QRgbMatrix.h \
-    ../include/camera/QCameraImageBase.h \
-    ../include/camera/QCameraImage.h \
+    #camera/QCameraImage/QRgbMatrix.h \
+    camera/QCameraImage/QCameraImageBase.h \
+    # camera/QCameraImage/QCameraImage.h \
     gui/mainwindow.h \
     camera/camerainterface.h \
     camera/cameraximea.h
 
 SOURCES += \
-    ../include/camera/QRgbMatrix.cpp \
-    ../include/camera/QCameraImageBase.cpp \
-    ../include/camera/QCameraImage.cpp \
+    #camera/QCameraImage/QRgbMatrix.cpp \
+    camera/QCameraImage/QCameraImageBase.cpp \
+    # camera/QCameraImage/QCameraImage.cpp \
     main.cpp \
     gui/mainwindow.cpp \
     camera/cameraximea.cpp

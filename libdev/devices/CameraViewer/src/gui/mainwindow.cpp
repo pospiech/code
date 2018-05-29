@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 
 #include "camera/cameraximea.h"
+#include "camera/QCameraImage/QCameraImageBase.h"
+
+#include <QScopedPointer>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,11 +21,18 @@ MainWindow::~MainWindow()
 
 void MainWindow::testImage()
 {
-    CameraXimea * camera = new CameraXimea();
-    camera->Initialize();
-    camera->openCamera();
-    camera->capture();
-    camera->closeCamera();
 
 }
 
+
+void MainWindow::on_pushButtonTakeImage_clicked()
+{
+    QScopedPointer<CameraXimea> camera(new CameraXimea());
+
+    camera->Initialize();
+    camera->openCamera();
+    camera->capture();
+    ui->widgetCameraImage->setImage(camera->image());
+    camera->closeCamera();
+
+}

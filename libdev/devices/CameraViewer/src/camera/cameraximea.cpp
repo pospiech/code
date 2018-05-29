@@ -6,6 +6,7 @@
 #include <QtCore/QRect>
 #include <QString>
 #include <QImage>
+#include <QMutex>
 #include <QMutexLocker>
 
 class CameraXimeaPrivate
@@ -19,6 +20,9 @@ public:
         numberOfDevices();
     }
 
+    QImage lastImage;
+    QMutex mutex;
+
     // structure containing information about incoming image.
     // -> does not contain image, only pointer to image
     XI_IMG image;
@@ -29,6 +33,57 @@ public:
     // camera number and count
     size_t cameraNumber = 0;
     size_t cameraCount = 0;
+
+    /** convert raw memory data to QImage format */
+    QImage toQImage(void * pMemVoid, size_t size, int format, int sizeX, int sizeY)
+    {
+
+        // Determine Image Format
+        QImage::Format qFormat = QImage::Format_Invalid;
+        switch (static_cast<XI_IMG_FORMAT>(format))
+        {
+        case XI_MONO8: // 8 bits per pixel
+        case XI_MONO16: // 16 bits per pixel
+              qFormat = QImage::Format_Mono;
+        }
+        if (qFormat == QImage::Format_Invalid)
+            qFatal("invalid image Format");
+
+        // convert / copy pointer data into vector
+        std::vector<int> grayVector(size);
+        if (static_cast<XI_IMG_FORMAT>(format) == XI_MONO16)
+        {
+            qint16* imageIterator = reinterpret_cast<qint16*> (pMemVoid);
+            for (size_t count = 0; count < size; ++count)
+            {
+                grayVector[count] = static_cast<int>(*imageIterator);
+                imageIterator++;
+            }
+        }
+
+        // convert gray values into QImage data
+        QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), qFormat);
+        for ( int y = 0; y < sizeY; ++y )
+        {
+            int yoffset = sizeY*y;
+            QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(y)) ;
+            for ( int x = 0; x < sizeX  ; ++x )
+            {
+                int pos = x + yoffset;
+                int color = grayVector[static_cast<size_t>(pos)];
+                *line++ = qRgb(color, color, color);
+            }
+        }
+        return image;
+    }
+
+    /** update image data with next image */
+    void updateImageData(QImage& nextImage)
+    {
+        QMutexLocker locker(&mutex);
+        this->lastImage = nextImage;
+    }
+
 
     /** handle camera error messages */
     void errorHandler(int retCode) const
@@ -80,7 +135,11 @@ public:
         XI_RETURN stat = xiGetNumberDevices(pNumberDevices);
         errorHandler(stat);
 
-        size_t count = static_cast<size_t>(*pNumberDevices);
+        // in case of error, pointer is 0
+        size_t count = 0;
+        if (pNumberDevices)
+            count = static_cast<size_t>(*pNumberDevices);
+
         this->cameraCount = count;
 
         return count;
@@ -191,6 +250,22 @@ public:
         errorHandler(xiSetParamInt(xiHandle, XI_PRM_HEIGHT, roi.height()));
     }
 
+    /** get ROI using offets and width and height */
+    QRect roi() const
+    {
+        QRect roi;
+        int value;
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_X, &value));
+        roi.setX(value);
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_Y, &value));
+        roi.setY(value);
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_WIDTH, &value));
+        roi.setWidth(value);
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_HEIGHT, &value));
+        roi.setHeight(value);
+        return roi;
+    }
+
     /** This function returns selected parameter of camera without opening it.
      * It allows to quickly get information from each camera in multiple camera setups.
      */
@@ -270,6 +345,12 @@ CameraXimea::CameraXimea()
 {
 
 }
+
+CameraXimea::~CameraXimea()
+{
+    // for QScopedPointer required.
+}
+
 /** Initialize - find number of devices and return first camera */
 bool CameraXimea::Initialize()
 {
@@ -309,6 +390,18 @@ void CameraXimea::setExposure(float exposure_ms)
     d->setExposure(exposure_ms);
 }
 
+QRect CameraXimea::roi() const
+{
+    Q_D(const CameraXimea);
+
+}
+
+void CameraXimea::setROI(QRect roi)
+{
+    Q_D(CameraXimea);
+    d->setROI(roi);
+}
+
 void CameraXimea::capture()
 {
     Q_D(CameraXimea);
@@ -320,60 +413,17 @@ void CameraXimea::capture()
 
     XI_IMG_FORMAT format = d->image.frm;
 
-    QImage image = this->toQImage(d->image.bp, d->image.bp_size, format, sizeX, sizeY);
+    QImage image = d->toQImage(d->image.bp, d->image.bp_size, format, sizeX, sizeY);
+    d->updateImageData(image);
 }
 
-void CameraXimea::updateImageData(QImage& nextImage)
-{
-    QMutexLocker locker(&mutex);
-    this->lastImage = nextImage;
-}
 
 QImage CameraXimea::image()
 {
-    QMutexLocker locker(&mutex);
-    return this->lastImage;
+    Q_D(CameraXimea);
+
+    QMutexLocker locker(&d->mutex);
+    return d->lastImage;
 }
 
 
-QImage CameraXimea::toQImage(void * pMemVoid, size_t size, int format, int sizeX, int sizeY)
-{
-
-    // Determine Image Format
-    QImage::Format qFormat = QImage::Format_Invalid;
-    switch (static_cast<XI_IMG_FORMAT>(format))
-    {
-    case XI_MONO8: // 8 bits per pixel
-    case XI_MONO16: // 16 bits per pixel
-          qFormat = QImage::Format_Mono;
-    }
-    if (qFormat == QImage::Format_Invalid)
-        qFatal("invalid image Format");
-
-    // convert / copy pointer data into vector
-    std::vector<int> grayVector(size);
-    if (static_cast<XI_IMG_FORMAT>(format) == XI_MONO16)
-    {
-        qint16* imageIterator = reinterpret_cast<qint16*> (pMemVoid);
-        for (size_t count = 0; count < size; ++count)
-        {
-            grayVector[count] = static_cast<int>(*imageIterator);
-            imageIterator++;
-        }
-    }
-
-    // convert gray values into QImage data
-    QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), qFormat);
-    for ( int y = 0; y < sizeY; ++y )
-    {
-        int yoffset = sizeY*y;
-        QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(y)) ;
-        for ( int x = 0; x < sizeX  ; ++x )
-        {
-            int pos = x + yoffset;
-            int color = grayVector[static_cast<size_t>(pos)];
-            *line++ = qRgb(color, color, color);
-        }
-    }
-    return image;
-}

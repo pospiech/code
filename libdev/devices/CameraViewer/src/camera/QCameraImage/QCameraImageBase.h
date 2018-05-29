@@ -1,53 +1,37 @@
 #ifndef CAMERAIMAGEBASE_H_
 #define CAMERAIMAGEBASE_H_
 
-#include <QtGlobal>
-
-#if defined(Q_WS_WIN)
-
-#ifdef CAMERAIMAGE_DLL
-
-#if defined(CAMERAIMAGE_NODLL)     // Do not create a DLL library
-    #define CAMERAIMAGE_EXPORT
-#else
-    #if defined(CAMERAIMAGE_MAKEDLL) // create a DLL library
-        #define CAMERAIMAGE_EXPORT  __declspec(dllexport)
-    #else                           // use a DLL library
-        #define CAMERAIMAGE_EXPORT  __declspec(dllimport)
-    #endif
-#endif
-
-#endif // CAMERAIMAGE_DLL
-
-#endif // Q_WS_WIN
-
-#ifndef CAMERAIMAGE_EXPORT
-#define CAMERAIMAGE_EXPORT
-#endif
-
 #include <windows.h>
 
-class QCameraImagePrivate;
+class QCameraImageBasePrivate;
 class QPaintEvent;
 class QResizeEvent;
 
 #include <QtWidgets/QWidget>
 #include <QImage>
 #include <QPixmap>
+#include <QtCore/QScopedPointer>
+
 
 #if defined(_MSC_VER) /* MSVC Compiler */
 #pragma warning( disable : 4100 )
 #endif
 
-class CAMERAIMAGE_EXPORT QCameraImageBase : public QWidget
+
+
+class QCameraImageBase : public QWidget
 {
     Q_OBJECT
 public:
     QCameraImageBase(QWidget* parent = 0, Qt::WindowFlags flags = 0);
     virtual ~QCameraImageBase();
 
+protected:
+    const QScopedPointer<QCameraImageBasePrivate> d_ptr;
+
 private:
-    QCameraImagePrivate * const d;
+    // requires d_ptr
+    Q_DECLARE_PRIVATE(QCameraImageBase)
 
 protected:
     void paintEvent(QPaintEvent * event);

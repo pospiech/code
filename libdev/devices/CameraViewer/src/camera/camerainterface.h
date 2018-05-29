@@ -7,7 +7,10 @@
 class CameraInterface
 {
 public:
-    virtual ~CameraInterface();
+    virtual ~CameraInterface()
+    {
+
+    }
 
     virtual QString description() const = 0;
     virtual QString	errorString() const = 0;

@@ -17,6 +17,9 @@ public:
 
     void testImage();
 
+private slots:
+    void on_pushButtonTakeImage_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
