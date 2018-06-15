@@ -16,8 +16,6 @@ public:
     {
         memset(&image,0,sizeof(image));
         image.size = sizeof(XI_IMG);
-
-        numberOfDevices();
     }
 
     QImage lastImage;
@@ -37,8 +35,33 @@ public:
     /** convert raw memory data to QImage format */
     QImage toQImage(void * pMemVoid, size_t size, int format, int sizeX, int sizeY)
     {
+        // test
+        size = sizeX*sizeY;
 
-        // Determine Image Format
+        std::vector<int> grayVector(size);
+        // convert / copy pointer data into vector: 8 bit
+        if (static_cast<XI_IMG_FORMAT>(format) == XI_MONO8)
+        {
+            quint8* imageIterator = reinterpret_cast<quint8*> (pMemVoid);
+            for (size_t count = 0; count < size; ++count)
+            {
+                grayVector[count] = static_cast<int>(*imageIterator);
+                imageIterator++;
+            }
+        }
+        // convert / copy pointer data into vector: 16 bit
+        if (static_cast<XI_IMG_FORMAT>(format) == XI_MONO16)
+        {
+            quint16* imageIterator = reinterpret_cast<quint16*> (pMemVoid);
+            for (size_t count = 0; count < size; ++count)
+            {
+                grayVector[count] = static_cast<int>(*imageIterator);
+                imageIterator++;
+            }
+        }
+
+
+        // Determine corresponding Qt Image Format
         QImage::Format qFormat = QImage::Format_Invalid;
         switch (static_cast<XI_IMG_FORMAT>(format))
         {
@@ -48,18 +71,6 @@ public:
         }
         if (qFormat == QImage::Format_Invalid)
             qFatal("invalid image Format");
-
-        // convert / copy pointer data into vector
-        std::vector<int> grayVector(size);
-        if (static_cast<XI_IMG_FORMAT>(format) == XI_MONO16)
-        {
-            qint16* imageIterator = reinterpret_cast<qint16*> (pMemVoid);
-            for (size_t count = 0; count < size; ++count)
-            {
-                grayVector[count] = static_cast<int>(*imageIterator);
-                imageIterator++;
-            }
-        }
 
         // convert gray values into QImage data
         QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), qFormat);
@@ -90,7 +101,93 @@ public:
     {
         if (retCode != XI_OK)
         {
-            qDebug() << "Ximea Error Code: " << retCode << endl;
+            QString errString;
+            switch (retCode)
+            {
+            //case XI_OK                : errString = "Function call succeeded"; break;
+            case XI_INVALID_HANDLE    : errString = "Invalid handle"; break;
+            case XI_READREG           : errString = "Register read error"; break;
+            case XI_WRITEREG          : errString = "Register write error"; break;
+            case XI_FREE_RESOURCES    : errString = "Freeing resources error"; break;
+            case XI_FREE_CHANNEL      : errString = "Freeing channel error"; break;
+            case XI_FREE_BANDWIDTH    : errString = "Freeing bandwith error"; break;
+            case XI_READBLK           : errString = "Read block error"; break;
+            case XI_WRITEBLK          : errString = "Write block error"; break;
+            case XI_NO_IMAGE          : errString = "No image"; break;
+            case XI_TIMEOUT           : errString = "Timeout"; break;
+            case XI_INVALID_ARG            : errString = "Invalid arguments supplied"; break;
+            case XI_NOT_SUPPORTED          : errString = "Not supported"; break;
+            case XI_ISOCH_ATTACH_BUFFERS   : errString = "Attach buffers error"; break;
+            case XI_GET_OVERLAPPED_RESULT  : errString = "Overlapped result"; break;
+            case XI_MEMORY_ALLOCATION      : errString = "Memory allocation error"; break;
+            case XI_DLLCONTEXTISNULL       : errString = "DLL context is NULL"; break;
+            case XI_DLLCONTEXTISNONZERO    : errString = "DLL context is non zero"; break;
+            case XI_DLLCONTEXTEXIST        : errString = "DLL context exists"; break;
+            case XI_TOOMANYDEVICES         : errString = "Too many devices connected"; break;
+            case XI_ERRORCAMCONTEXT        : errString = "Camera context error"; break;
+            case XI_UNKNOWN_HARDWARE       : errString = "Unknown hardware"; break;
+            case XI_INVALID_TM_FILE        : errString = "Invalid TM file"; break;
+            case XI_INVALID_TM_TAG         : errString = "Invalid TM tag"; break;
+            case XI_INCOMPLETE_TM          : errString = "Incomplete TM"; break;
+            case XI_BUS_RESET_FAILED       : errString = "Bus reset error"; break;
+            case XI_NOT_IMPLEMENTED        : errString = "Not implemented"; break;
+            case XI_SHADING_TOOBRIGHT      : errString = "Shading is too bright"; break;
+            case XI_SHADING_TOODARK        : errString = "Shading is too dark"; break;
+            case XI_TOO_LOW_GAIN           : errString = "Gain is too low"; break;
+            case XI_INVALID_BPL            : errString = "Invalid bad pixel list"; break;
+            case XI_BPL_REALLOC            : errString = "Bad pixel list realloc error"; break;
+            case XI_INVALID_PIXEL_LIST     : errString = "Invalid pixel list"; break;
+            case XI_INVALID_FFS            : errString = "Invalid Flash File System"; break;
+            case XI_INVALID_PROFILE        : errString = "Invalid profile"; break;
+            case XI_INVALID_CALIBRATION    : errString = "Invalid calibration"; break;
+            case XI_INVALID_BUFFER         : errString = "Invalid buffer"; break;
+            case XI_INVALID_DATA           : errString = "Invalid data"; break;
+            case XI_TGBUSY                 : errString = "Timing generator is busy"; break;
+            case XI_IO_WRONG               : errString = "Wrong operation open/write/read/close"; break;
+            case XI_ACQUISITION_ALREADY_UP : errString = "Acquisition already started"; break;
+            case XI_OLD_DRIVER_VERSION     : errString = "Old version of device driver installed to the system."; break;
+            case XI_GET_LAST_ERROR         : errString = "To get error code please call GetLastError function."; break;
+            case XI_CANT_PROCESS           : errString = "Data cannot be processed"; break;
+            case XI_ACQUISITION_STOPED     : errString = "Acquisition is stopped. It needs to be started to perform operation."; break;
+            case XI_ACQUISITION_STOPED_WERR: errString = "Acquisition has been stopped with an error."; break;
+            case XI_INVALID_INPUT_ICC_PROFILE      : errString = "Input ICC profile missing or corrupted"; break;
+            case XI_INVALID_OUTPUT_ICC_PROFILE     : errString = "Output ICC profile missing or corrupted"; break;
+            case XI_DEVICE_NOT_READY       : errString = "Device not ready to operate"; break;
+            case XI_SHADING_TOOCONTRAST    : errString = "Shading is too contrast"; break;
+            case XI_ALREADY_INITIALIZED    : errString = "Module already initialized"; break;
+            case XI_NOT_ENOUGH_PRIVILEGES  : errString = "Application does not have enough privileges (one or more app)"; break;
+            case XI_NOT_COMPATIBLE_DRIVER  : errString = "Installed driver is not compatible with current software"; break;
+            case XI_TM_INVALID_RESOURCE    : errString = "TM file was not loaded successfully from resources"; break;
+            case XI_DEVICE_HAS_BEEN_RESETED: errString = "Device has been reset, abnormal initial state"; break;
+            case XI_NO_DEVICES_FOUND       : errString = "No Devices Found"; break;
+            case XI_RESOURCE_OR_FUNCTION_LOCKED    : errString = "Resource (device) or function locked by mutex"; break;
+            case XI_BUFFER_SIZE_TOO_SMALL  : errString = "Buffer provided by user is too small"; break;
+            case XI_COULDNT_INIT_PROCESSOR : errString = "Couldnt initialize processor."; break;
+            case XI_NOT_INITIALIZED        : errString = "The object/module/procedure/process being referred to has not been started."; break;
+            case XI_RESOURCE_NOT_FOUND     : errString = "Resource not found(could be processor, file, item...)."; break;
+            case XI_UNKNOWN_PARAM          : errString = "Unknown parameter"; break;
+            case XI_WRONG_PARAM_VALUE      : errString = "Wrong parameter value"; break;
+            case XI_WRONG_PARAM_TYPE       : errString = "Wrong parameter type"; break;
+            case XI_WRONG_PARAM_SIZE       : errString = "Wrong parameter size"; break;
+            case XI_BUFFER_TOO_SMALL       : errString = "Input buffer is too small"; break;
+            case XI_NOT_SUPPORTED_PARAM    : errString = "Parameter is not supported"; break;
+            case XI_NOT_SUPPORTED_PARAM_INFO       : errString = "Parameter info not supported"; break;
+            case XI_NOT_SUPPORTED_DATA_FORMAT      : errString = "Data format is not supported"; break;
+            case XI_READ_ONLY_PARAM        : errString = "Read only parameter"; break;
+            case XI_BANDWIDTH_NOT_SUPPORTED: errString = "This camera does not support currently available bandwidth"; break;
+            case XI_INVALID_FFS_FILE_NAME  : errString = "FFS file selector is invalid or NULL"; break;
+            case XI_FFS_FILE_NOT_FOUND     : errString = "FFS file not found"; break;
+            case XI_PARAM_NOT_SETTABLE     : errString = "Parameter value cannot be set (might be out of range or invalid)."; break;
+            case XI_SAFE_POLICY_NOT_SUPPORTED      : errString = "Safe buffer policy is not supported. E.g. when transport target is set to GPU (GPUDirect)."; break;
+            case XI_GPUDIRECT_NOT_AVAILABLE: errString = "GPUDirect is not available. E.g. platform isn't supported or CUDA toolkit isn't installed."; break;
+            case XI_PROC_OTHER_ERROR       : errString = "Processing error - other"; break;
+            case XI_PROC_PROCESSING_ERROR  : errString = "Error while image processing."; break;
+            case XI_PROC_INPUT_FORMAT_UNSUPPORTED  : errString = "Input format is not supported for processing."; break;
+            case XI_PROC_OUTPUT_FORMAT_UNSUPPORTED : errString = "Output format is not supported for processing."; break;
+            case XI_OUT_OF_RANGE           : errString = "Parameter value is out of range"; break;
+            }
+
+            qDebug() << "CameraViewer: Ximea Error Code: "<< retCode << errString << endl;
         }
     }
 
@@ -131,14 +228,11 @@ public:
      */
     size_t numberOfDevices()
     {
-        PDWORD pNumberDevices = nullptr;
-        XI_RETURN stat = xiGetNumberDevices(pNumberDevices);
+        DWORD NumberDevices;
+        XI_RETURN stat = xiGetNumberDevices(&NumberDevices);
         errorHandler(stat);
 
-        // in case of error, pointer is 0
-        size_t count = 0;
-        if (pNumberDevices)
-            count = static_cast<size_t>(*pNumberDevices);
+        size_t count = static_cast<size_t>(NumberDevices);
 
         this->cameraCount = count;
 
@@ -352,12 +446,13 @@ CameraXimea::~CameraXimea()
 }
 
 /** Initialize - find number of devices and return first camera */
-bool CameraXimea::Initialize()
+bool CameraXimea::initialize()
 {
     Q_D(CameraXimea);
-    size_t count = d->cameraCount;
+    size_t count = d->numberOfDevices();
+
     if (count > 0){
-        d->setCameraNumber(1);
+        d->setCameraNumber(0); // numbers start at 0
         return true;
     }
     else{
@@ -393,7 +488,7 @@ void CameraXimea::setExposure(float exposure_ms)
 QRect CameraXimea::roi() const
 {
     Q_D(const CameraXimea);
-
+    // todo: add get roi
 }
 
 void CameraXimea::setROI(QRect roi)

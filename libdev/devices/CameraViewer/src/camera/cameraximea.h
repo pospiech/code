@@ -16,7 +16,7 @@ public:
     virtual ~CameraXimea();
 
     QString description() const { return "XIMEA"; }
-    QString	errorString() const {return ""; }
+    QString	errorString() {return ""; }
 
     void openCamera();
     void closeCamera();
@@ -29,7 +29,7 @@ public:
     QRect roi() const;
     void setROI(QRect roi);    
 
-    bool Initialize();
+    bool initialize();
 
     QImage image();
 

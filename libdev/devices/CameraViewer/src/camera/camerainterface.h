@@ -13,10 +13,11 @@ public:
     }
 
     virtual QString description() const = 0;
-    virtual QString	errorString() const = 0;
+    virtual QString	errorString() = 0;
 
     virtual void capture() = 0;
 
+    virtual bool initialize() = 0;
     virtual void openCamera() = 0;
     virtual void closeCamera() = 0;
 

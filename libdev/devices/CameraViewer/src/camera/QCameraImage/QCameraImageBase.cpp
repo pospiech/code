@@ -80,6 +80,7 @@ void QCameraImageBase::resizeEvent ( QResizeEvent * event  )
 
 void QCameraImageBase::paintEvent(QPaintEvent * event)
 {
+    qDebug() << "calling paintEvent" << endl;
     Q_UNUSED(event)
 
     Q_D(QCameraImageBase);
@@ -99,6 +100,7 @@ void QCameraImageBase::paintEvent(QPaintEvent * event)
     double scaleFracY = double(d->viewSize.height())/double(height);
     painter.scale(scaleFracX, scaleFracY);
     //d->pixmap = d->pixmap.scaled(scaleFracX, scaleFracY, d->aspectRatio);
+    qDebug() << "drawing pixmap" << endl;
     painter.drawPixmap(0, 0, d->pixmap);
 
     paintEventExtras(painter);

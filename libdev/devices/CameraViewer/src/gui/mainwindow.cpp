@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    camera.reset(new CameraXimea());
 }
 
 MainWindow::~MainWindow()
@@ -26,13 +27,13 @@ void MainWindow::testImage()
 
 
 void MainWindow::on_pushButtonTakeImage_clicked()
-{
-    QScopedPointer<CameraXimea> camera(new CameraXimea());
-
-    camera->Initialize();
-    camera->openCamera();
-    camera->capture();
-    ui->widgetCameraImage->setImage(camera->image());
-    camera->closeCamera();
+{    
+    bool isReady = camera->initialize();
+    if (isReady){
+        camera->openCamera();
+        camera->capture();
+        ui->widgetCameraImage->setImage(camera->image());
+        //camera->closeCamera();
+    }
 
 }

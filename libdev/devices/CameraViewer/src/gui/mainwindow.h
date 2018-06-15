@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+class CameraXimea;
+
 namespace Ui {
 class MainWindow;
 }
@@ -22,6 +24,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QScopedPointer<CameraXimea> camera;
 };
 
 #endif // MAINWINDOW_H
