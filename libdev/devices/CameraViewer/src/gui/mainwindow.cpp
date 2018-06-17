@@ -29,11 +29,11 @@ void MainWindow::testImage()
 void MainWindow::on_pushButtonTakeImage_clicked()
 {    
     bool isReady = camera->initialize();
-    if (isReady){
+    if (isReady){       
         camera->openCamera();
         camera->capture();
         ui->widgetCameraImage->setImage(camera->image());
-        //camera->closeCamera();
+        camera->closeCamera();
     }
 
 }

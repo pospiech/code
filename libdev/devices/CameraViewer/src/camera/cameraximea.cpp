@@ -73,7 +73,7 @@ public:
             qFatal("invalid image Format");
 
         // convert gray values into QImage data
-        QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), qFormat);
+        QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), QImage::Format_RGB32);
         for ( int y = 0; y < sizeY; ++y )
         {
             int yoffset = sizeY*y;
@@ -81,7 +81,7 @@ public:
             for ( int x = 0; x < sizeX  ; ++x )
             {
                 int pos = x + yoffset;
-                int color = grayVector[static_cast<size_t>(pos)];
+                int color = grayVector[static_cast<size_t>(pos)] * 20;
                 *line++ = qRgb(color, color, color);
             }
         }
@@ -503,12 +503,12 @@ void CameraXimea::capture()
     d->startAcquisition();
     d->getImage();
     d->stopAcquisition();
+
     int sizeX = static_cast<int>(d->image.width);
     int sizeY = static_cast<int>(d->image.height);
-
     XI_IMG_FORMAT format = d->image.frm;
-
     QImage image = d->toQImage(d->image.bp, d->image.bp_size, format, sizeX, sizeY);
+
     d->updateImageData(image);
 }
 
