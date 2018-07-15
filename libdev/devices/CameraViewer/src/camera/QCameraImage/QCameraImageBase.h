@@ -42,8 +42,8 @@ protected:
 public:
     HWND windowHandle();
 
-    void setImage(const QImage & image);
-    void setPixmap(const QPixmap & pixmap);
+    void setImage(const QImage image);
+    void setPixmap(const QPixmap pixmap);
     void setImageSize(const int & width, const int & height);
     void setViewSize(const int & width, const int & height);
     void setAutoResize(bool resize);

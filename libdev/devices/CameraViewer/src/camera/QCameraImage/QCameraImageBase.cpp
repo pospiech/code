@@ -65,6 +65,9 @@ QCameraImageBase::QCameraImageBase(QWidget* parent, Qt::WindowFlags flags)
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_NativeWindow);
     setAttribute(Qt::WA_DontCreateNativeAncestors);
+
+    // default background -> black
+    this->setStyleSheet("background-color:black;");
 }
 
 QCameraImageBase::~QCameraImageBase()
@@ -80,7 +83,6 @@ void QCameraImageBase::resizeEvent ( QResizeEvent * event  )
 
 void QCameraImageBase::paintEvent(QPaintEvent * event)
 {
-    qDebug() << "calling paintEvent" << endl;
     Q_UNUSED(event)
 
     Q_D(QCameraImageBase);
@@ -101,7 +103,7 @@ void QCameraImageBase::paintEvent(QPaintEvent * event)
     painter.scale(scaleFracX, scaleFracY);
     //d->pixmap = d->pixmap.scaled(scaleFracX, scaleFracY, d->aspectRatio);
     qDebug() << "drawing pixmap" << endl;
-    painter.drawPixmap(0, 0, d->pixmap);
+    //painter.drawPixmap(0, 0, d->pixmap);
 
     paintEventExtras(painter);
 
@@ -123,7 +125,7 @@ HWND QCameraImageBase::windowHandle()
     // return static_cast<HWND>(this->winId());
 }
 
-void QCameraImageBase::setImage(const QImage & image)
+void QCameraImageBase::setImage(const QImage image)
 {
     Q_D(QCameraImageBase);
 
@@ -133,7 +135,7 @@ void QCameraImageBase::setImage(const QImage & image)
     update(); // calls paintEvent
 }
 
-void QCameraImageBase::setPixmap(const QPixmap & pixmap)
+void QCameraImageBase::setPixmap(const QPixmap pixmap)
 {
     Q_D(QCameraImageBase);
 

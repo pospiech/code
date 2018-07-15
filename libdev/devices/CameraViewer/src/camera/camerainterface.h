@@ -3,6 +3,7 @@
 
 #include<QtCore/QRect>
 #include<QImage>
+#include <vector>
 
 class CameraInterface
 {
@@ -27,6 +28,9 @@ public:
     virtual QRect roi() const = 0;
     virtual void setROI(QRect roi) = 0;
 
+    virtual std::vector<int> data() = 0;
+    virtual std::vector<int> histogram() = 0;
+    virtual QImage image() = 0;
 };
 
 #endif // CAMERAINTERFACE_H

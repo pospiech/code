@@ -8,7 +8,7 @@
 
 class CameraXimeaPrivate;
 
-class CameraXimea : public QObject, CameraInterface
+class CameraXimea : public QObject, public CameraInterface
 {
      Q_OBJECT
 public:
@@ -32,6 +32,9 @@ public:
     bool initialize();
 
     QImage image();
+
+    std::vector<int> data();
+    std::vector<int> histogram();
 
 protected:
     const QScopedPointer<CameraXimeaPrivate> d_ptr;

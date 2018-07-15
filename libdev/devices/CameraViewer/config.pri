@@ -18,8 +18,9 @@ TEMPLATE = app
 
 QT += core
 QT += gui
-QT += gui-private
+# QT += gui-private
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += charts
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -49,8 +50,8 @@ QMAKE_CXXFLAGS_WARN_OFF = $$QMAKE_CXXFLAGS_WARN_OFF -w34100
 # have to differ to avoid, that they overwrite each other.
 # #####################################################################
 # Enable debug_and_release + build_all if you want to build both.
-# CONFIG += debug # release/debug/debug_and_release
-# CONFIG -= release
+# CONFIG -= debug # release/debug/debug_and_release
+# CONFIG += release
 # On Windows you can't mix release and debug libraries.
 # CONFIG           += debug_and_release
 # CONFIG           += build_all
