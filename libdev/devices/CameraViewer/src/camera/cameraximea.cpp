@@ -42,6 +42,12 @@ void CameraXimea::closeCamera()
     d->closeCamera();
 }
 
+bool CameraXimea::isOpen()
+{
+    Q_D(CameraXimea);
+    return d->isOpen;
+}
+
 float CameraXimea::exposure() const
 {
     Q_D(const CameraXimea);
@@ -73,8 +79,7 @@ void CameraXimea::capture()
     d->getImage();
     d->stopAcquisition();
 
-    QImage image = d->toQImage(&d->image);
-    d->updateImageData(image);
+    d->updateImageData(d->toQImage(d->imageSize()));
 }
 
 

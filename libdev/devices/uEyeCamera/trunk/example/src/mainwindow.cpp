@@ -58,7 +58,7 @@ void MainWindow::OnActionCameraSettings()
     dlgCameraSettings->show();
     dlgCameraSettings->activateWindow();
 }
-
+3
 
 void MainWindow::on_pushButtonGetImage_clicked()
 {

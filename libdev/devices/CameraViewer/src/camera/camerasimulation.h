@@ -1,24 +1,20 @@
-#ifndef CAMERAUEYE_H
-#define CAMERAUEYE_H
+#ifndef CAMERASIMULATION_H
+#define CAMERASIMULATION_H
 
 #include <QObject>
 #include "camerainterface.h"
-#include <uEye.h>
 
-#include<QtCore/QScopedPointer>
+class CameraSimulationPrivate;
 
-class CameraUEyePrivate;
-
-
-class CameraUEye: public QObject, public CameraInterface
+class CameraSimulation: public QObject, public CameraInterface
 {
     Q_OBJECT
 public:
 
-    CameraUEye();
-    virtual ~CameraUEye();
+    CameraSimulation();
+    virtual ~CameraSimulation();
 
-    QString description() const { return "uEye"; }
+    QString description() const { return "Camera Simulation"; }
     QString	errorString() {return ""; }
 
     void openCamera();
@@ -41,13 +37,16 @@ public:
     std::vector<int> histogram();
 
 protected:
-    const QScopedPointer<CameraUEyePrivate> d_ptr;
+    const QScopedPointer<CameraSimulationPrivate> d_ptr;
 
 private:
     // requires d_ptr
-    Q_DECLARE_PRIVATE(CameraUEye)
+    Q_DECLARE_PRIVATE(CameraSimulation)
+
+
 
 };
 
 
-#endif // CAMERAUEYE_H
+
+#endif // CAMERASIMULATION_H

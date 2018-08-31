@@ -3,7 +3,7 @@
 
 #include "camera/cameraximea.h"
 #include "camera/cameraueye.h"
-//#include "camera/QCameraImage/QCameraImageBase.h"
+#include "camera/camerasimulation.h"
 
 #include <QScopedPointer>
 
@@ -18,18 +18,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // camera.reset(new CameraXimea());
-    camera.reset(new CameraUEye());
 
     SignalAppender* signalAppender = new SignalAppender;
-    signalAppender->setFormat("[%{type:-7}] %{time}{dd-MM-yyyy, HH:mm}; Thread: %{threadid}; <%{Function}>; %{message}\n");
+    signalAppender->setFormat("[%{type:-7}] %{time}{dd-MM-yyyy, HH:mm}; Thread: %{threadid}; <%{Function}>; %{message}");
     signalAppender->setDetailsLevel(Logger::Trace);
     Logger::globalInstance()->registerAppender(signalAppender);
 
     QObject::connect(signalAppender, &SignalAppender::logMessage,
                       ui->widgetMessageList, &WidgetMessageList::addString);
 
-   resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
+    resize(QGuiApplication::primaryScreen()->availableSize() * 4 / 5);
+
+    // set widgets as if no camera is open
+    on_pushButtonCameraClose_clicked();
+
+    // find cameras and add to list
+    findCameras();
 }
 
 MainWindow::~MainWindow()
@@ -38,30 +42,76 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::testImage()
+
+void MainWindow::findCameras()
 {
+    // test ueye Cameras
+    CameraUEye * cameraUEye = new CameraUEye;
+    bool isReady = cameraUEye->initialize();
+    if (isReady)
+        cameraList.append(cameraUEye);
+
+    // test Ximea Cameras
+    CameraXimea * cameraXimea = new CameraXimea;
+    isReady = cameraXimea->initialize();
+    if (isReady)
+        cameraList.append(cameraXimea);
+
+    // test Simulation Camera
+    CameraSimulation * cameraSimulation = new CameraSimulation;
+    isReady = cameraSimulation->initialize();
+    if (isReady)
+        cameraList.append(cameraSimulation);
+
+    for (int i = 0; i < cameraList.size(); ++i)
+    {
+        ui->comboBoxCameraSelect->addItem(cameraList.at(i)->description(), i);
+    }
+
 
 }
 
 void MainWindow::on_pushButtonTakeImage_clicked()
 {    
-    bool isReady = camera->initialize();
-    if (isReady){
-        ui->widgetMessageList->addString("Camera opened");
-        camera->openCamera();
+    int index = ui->comboBoxCameraSelect->currentData().toInt();
+    CameraInterface * camera = cameraList.at(index);
+    if (camera->isOpen()) {
         camera->setExposure(1);
         camera->capture();
         LOG_INFO() << " set image to widget";
         ui->widgetCameraImage->setImage(camera->image());
         LOG_INFO() << " set data to histogram";
         ui->widgetHistogram->setData(camera->histogram());
-        camera->closeCamera();
         LOG_INFO() << "finished take Image";
     }
-
 }
 
 void MainWindow::on_actionClose_triggered()
 {
+    on_pushButtonCameraClose_clicked();
     QCoreApplication::quit();
+}
+
+void MainWindow::on_pushButtonCameraOpen_clicked()
+{
+    int index = ui->comboBoxCameraSelect->currentData().toInt();
+    CameraInterface * camera = cameraList.at(index);
+    camera->openCamera();
+    ui->pushButtonCameraClose->setEnabled(true);
+    ui->pushButtonCameraOpen->setEnabled(false);
+    ui->pushButtonTakeImage->setEnabled(true);
+
+}
+
+void MainWindow::on_pushButtonCameraClose_clicked()
+{
+    int index = ui->comboBoxCameraSelect->currentData().toInt();
+    if (index>0) {
+        CameraInterface * camera = cameraList.at(index);
+        camera->closeCamera();
+    }
+    ui->pushButtonCameraClose->setEnabled(false);
+    ui->pushButtonCameraOpen->setEnabled(true);
+    ui->pushButtonTakeImage->setEnabled(false);
+
 }

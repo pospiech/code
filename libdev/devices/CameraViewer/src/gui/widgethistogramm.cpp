@@ -50,6 +50,7 @@ void WidgetHistogramm::setData(const std::vector<int> data)
     series->append(points);
 
     chart->axisX()->setRange(0, data.size());
+//    chart->axisX()->setRange(0, 100);
     chart->axisY()->setRange(0, 100);
 
 //    series->clear();

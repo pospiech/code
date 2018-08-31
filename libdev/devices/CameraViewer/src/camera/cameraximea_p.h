@@ -1,47 +1,26 @@
 #ifndef CAMERAXIMEA_P_H
 #define CAMERAXIMEA_P_H
 
+#include "cameraimplementation.h"
+
 #include "xiApi.h"
 #include <memory.h>
 #include <QtDebug>
 #include <QtCore/QRect>
 #include <QString>
-#include <QImage>
-#include <QMutex>
-#include <QMutexLocker>
-
-#include "Logger.h"
 
 #include <stdexcept>
 #include <math.h>
 
-//static QVector<QRgb> grayScaleColorTable(int colorcount = 256) {
-//  static QVector<QRgb> table;
-//  if (table.isEmpty()) {
-//    Q_ASSERT(colorcount >0 && colorcount < 65537);
-//    table.resize(colorcount);
-//    auto *data = table.data();
-//    for (int i = 0; i < table.size(); ++i)
-//      data[i] = qRgb(i, i, i);
-//  }
-//  return table;
-//}
-
-class CameraXimeaPrivate
+class CameraXimeaPrivate: public CameraImplementation
 {
 public:
     CameraXimeaPrivate()
     {
         memset(&image,0,sizeof(image));
         image.size = sizeof(XI_IMG);
+        isOpen = false;
     }
-
-    QImage lastImage;
-    QMutex mutex;
-
-    std::vector<int> grayVector;
-    std::vector<int> histVector;
-
 
     // structure containing information about incoming image.
     // -> does not contain image, only pointer to image
@@ -53,89 +32,6 @@ public:
     // camera number and count
     size_t cameraNumber = 0;
     size_t cameraCount = 0;
-
-    /** convert raw memory data to QImage format
-     * by Kuba Ober
-     * https://stackoverflow.com/questions/50877195/how-to-convert-ximea-xiapi-camera-data-into-qimage
-     */
-//    QImage fromXiImage(const XI_IMG *src, QImage::Format dstFormat = QImage::Format_ARGB32_Premultiplied) {
-//      // make sure all relevant parameters are correct
-//      Q_ASSERT(src->width > 0 && src->height > 0  && src->bp_size > 0);
-//      // destiny format must be valid
-//      Q_ASSERT(dstFormat != QImage::Format_Invalid);
-
-//      // settings
-//      bool swap = false; // apply rgb swap (if source is swapped)
-
-//      QVector<QRgb> colorTable;
-
-//      // determine number of Bytes in source image
-//      // set equilvalent QImage format.
-//      int srcPixelBytes = 0;
-//      QImage::Format srcFormat = QImage::Format_Invalid;
-//      switch (src->frm) {
-//      case XI_MONO8: // 8 bits per pixel
-//        srcPixelBytes = 1;
-//        if (QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-//          srcFormat = QImage::Format_Grayscale8;
-//        else {
-//          colorTable = grayScaleColorTable();
-//          srcFormat = QImage::Format_Indexed8;
-//        }
-//        break;
-//      case XI_MONO16: // 16 bits per pixel
-//          srcPixelBytes = 2;
-//          colorTable = grayScaleColorTable(65536);
-//          srcFormat = QImage::Format_RGB32;
-//          break;
-//      case XI_RGB24:
-//        srcPixelBytes = 3;
-//        srcFormat = QImage::Format_RGB888;
-//        break;
-//      case XI_RGB32:
-//        srcPixelBytes = 4;
-//        srcFormat = QImage::Format_RGB32;
-//        break;
-//      }
-
-//      // handle error -> no format selected
-//      if (srcFormat == QImage::Format_Invalid) {
-//        qWarning("Unhandled XI_IMG image format");
-//        return {};
-//      }
-
-
-//      // determine bytesPerLine = width * bytes + padding_x
-//      Q_ASSERT(srcPixelBytes > 0 && srcPixelBytes <= 4);
-//      int bytesPerLine = src->width * srcPixelBytes + src->padding_x;
-//      if ((bytesPerLine * src->height - src->padding_x) > src->bp_size) {
-//        qWarning("Inconsistent XI_IMG data");
-//        return {};
-//      }
-
-//      // Constructs an image with the given width, height and format, that uses an existing memory buffer
-//      // in this case the XI src->bp, which is cast to a usable QImage format.
-//      QImage ret{static_cast<const uchar*>(src->bp), src->width, src->height,
-//                 bytesPerLine, srcFormat};
-
-//      // The QImage is only filled with an indexed format,
-//      // no information how to color these, therefore a color table needs to be set
-//      if (!colorTable.isEmpty())
-//        ret.setColorTable(colorTable);
-
-//      // convert to destiny format if necessary
-//      if (srcFormat != dstFormat)
-//        ret = std::move(ret).convertToFormat(dstFormat);
-
-//      // swap RGB if set
-//      if (swap)
-//        ret = std::move(ret).rgbSwapped();
-
-//      if (!ret.isDetached()) // ensure that we don't share XI_IMG's data buffer
-//        ret.detach();
-
-//      return ret;
-//    }
 
     /** determine bytes of a single pixel, depending on the format */
     int bytesPerPixel(XI_IMG_FORMAT format)
@@ -210,57 +106,20 @@ public:
         LOG_INFO() << "create Data from Raw Image (finished)";
     }
 
-
-    /** convert raw memory data to QImage format */
-    QImage toQImage(const XI_IMG *src, QImage::Format dstFormat = QImage::Format_ARGB32_Premultiplied)
+    /** returns current image size in Pixel  */
+    QSize imageSize()
     {
-        // destiny format must be valid
-        Q_ASSERT(dstFormat != QImage::Format_Invalid);
-
-        const size_t sizeX = static_cast<size_t>(src->width);
-        const size_t sizeY = static_cast<size_t>(src->height);
-//        XI_IMG_FORMAT format = src->frm;
-
-//        int correctionFaktor = 1;
-//        if (static_cast<XI_IMG_FORMAT>(format) == XI_MONO16) {
-//            correctionFaktor = 256;
-//        }
-        auto maxValue = *max_element(std::begin(grayVector), std::end(grayVector));
-        auto minValue = *min_element(std::begin(grayVector), std::end(grayVector));
-        float maxDivider = (maxValue-minValue);
-
-        LOG_INFO() << "max" << maxValue;
-        LOG_INFO() << "min" << maxValue;
-        LOG_INFO() << "d" << maxValue;
-
-        // convert gray values into QImage data
-        QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), QImage::Format_ARGB32_Premultiplied);
-        for ( size_t y = 0; y < sizeY; ++y )
-        {
-            size_t yoffset = y * sizeX;
-            QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(int(y))) ;
-            for ( size_t x = 0; x < sizeX  ; ++x )
-            {
-                size_t pos = x + yoffset;
-                int color = (grayVector[static_cast<size_t>(pos)] - minValue) / maxDivider * 255;
-                *line++ = qRgb(color, color, color);
-            }
-        }
-
-        // convert to destiny format
-        // image = std::move(image).convertToFormat(dstFormat);
-
-        LOG_INFO() << "to QImage from data (finished)";
-        return image;
+        return QSize(static_cast<int>(image.width), static_cast<int>(image.height));
     }
 
-    /** update image data with next image */
-    void updateImageData(QImage& nextImage)
-    {
-        QMutexLocker locker(&mutex);
-        this->lastImage = nextImage;
-        LOG_INFO() << "update Image (finished)";
-    }
+
+//    /** update image data with next image */
+//    void updateImageData(QImage& nextImage)
+//    {
+//        QMutexLocker locker(&mutex);
+//        this->lastImage = nextImage;
+//        LOG_INFO() << "update Image (finished)";
+//    }
 
     /** stores camera Number for futher usage
      */
@@ -282,6 +141,8 @@ public:
         XI_RETURN stat = XI_OK;
         stat = xiOpenDevice(static_cast<DWORD>(cameraNumber), &xiHandle);
         errorHandler(stat);
+        if (stat == XI_OK)
+            isOpen = true;
         LOG_INFO() << "open Camera";
     }
 
@@ -293,6 +154,9 @@ public:
         XI_RETURN stat = XI_OK;
         stat = xiCloseDevice(xiHandle);
         errorHandler(stat);
+        if (stat == XI_OK)
+            isOpen = false;
+
         LOG_INFO() << "close Camera (finished)";
     }
 

@@ -33,6 +33,12 @@ void CameraUEye::openCamera()
     d->openCamera();
 }
 
+bool CameraUEye::isOpen()
+{
+    Q_D(CameraUEye);
+    return d->isOpen;
+}
+
 void CameraUEye::closeCamera()
 {
     Q_D(CameraUEye);
@@ -68,8 +74,7 @@ void CameraUEye::capture()
     Q_D(CameraUEye);
     d->getImage();
 
-    QImage image = d->toQImage();
-    d->updateImageData(image);
+    d->updateImageData(d->toQImage(d->imageSize()));
 }
 
 

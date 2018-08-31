@@ -2,23 +2,20 @@
 #define CAMERAUEYE_P_H
 
 #include "cameratools.h"
+#include "cameraimplementation.h"
+
 #include <uEye.h>
-//#include <memory.h>
 
 #include <QtDebug>
 #include <QtCore/QRect>
 #include <QString>
-#include <QImage>
-#include <QMutex>
-#include <QMutexLocker>
 
-#include "Logger.h"
 
 #include <stdexcept>
 #include <math.h>
 
 
-class CameraUEyePrivate
+class CameraUEyePrivate: public CameraImplementation
 {
 public:
     CameraUEyePrivate()
@@ -29,26 +26,19 @@ public:
 
     // uEye varibles
     HIDS	m_hCam;			// handle to camera
-    //HWND	m_hWndDisplay;	// handle to diplay window
-    //INT		m_Ret;			// return value of uEye SDK functions
     INT		m_nColorMode;	// Y8/RGB16/RGB24/REG32
     INT		m_nBitsPerPixel;// number of bits needed store one pixel
-//    INT		m_nSizeX;		// width of video
-//    INT		m_nSizeY;		// height of video
     INT		m_lMemoryId;	// grabber memory - buffer ID
     char*	m_pcImageMemory;// grabber memory - pointer to buffer
-//    INT     m_nRenderMode;  // render  mode
-//    SENSORINFO m_sInfo;	    // sensor information struct
 
-    //used exposure time
-//    double m_ExposureTime;
+//    QSize sizeSensor;
+//    QImage lastImage;
+//    QMutex mutex;
 
-    QSize sizeSensor;
-    QImage lastImage;
-    QMutex mutex;
+//    bool isOpen;
 
-    std::vector<int> grayVector;
-    std::vector<int> histVector;
+//    std::vector<int> grayVector;
+//    std::vector<int> histVector;
 
     /** handle camera error messages */
     void errorHandler(int retCode) const
@@ -82,13 +72,6 @@ public:
             // get pointer to active image buffer
             void *pMemVoid;
             is_GetImageMem( this->m_hCam, &pMemVoid );
-
-            // pitch returns the line increment in bytes.
-            // The row increment is the number of bytes from the beginning of a line to the beginning of the next line.
-            // The row increment may be larger than the one in the call by is_AllocImageMem ().
-            // The row increment is always a number of bytes divisible by 4.
-//            int nPitch;
-//            is_GetImageMemPitch( m_hCam, &nPitch );
 
             // get current image size
             const size_t sizeX = static_cast<size_t>(imageSize().width());
@@ -144,22 +127,6 @@ public:
                 LOG_WARNING() << "Unhandled image format";
                 return;
             } // end of switch
-//                {
-//                    // calculate pixel offset (pixel locatation in memory)
-//                    char* pPixelPointer;
-//                    int r,g,b; r = g = b = 0;
-//                    for ( int y = 0; y < frameSize().height(); y++ ) {
-//                        long yoffset = ((long)y * nPitch );
-//                        for ( int x = 0; x < frameSize().width(); x++ ) {
-//                            // (x*bytes) + (y * sizex)
-//                            long lMemoryPixelOffset = ((long)x * d->BytesPerPixel) + yoffset;
-//                            pPixelPointer = (reinterpret_cast<char*> (pMemVoid) + (lMemoryPixelOffset)) ;
-//                            pixelToRGB(pPixelPointer, r, g, b);
-//                            d->rgbMatrix.setPixel(x,y,r,g,b);
-//                        }
-//                    }
-//                }
-
 
             LOG_INFO() << "Time: " << time.elapsed();
             LOG_INFO() << "create Data from Raw Image (finished)";
@@ -167,51 +134,51 @@ public:
     }
 
 
-    /** convert raw memory data to QImage format */
-    QImage toQImage()
-    {
-        // get current image size
-        const size_t sizeX = static_cast<size_t>(imageSize().width());
-        const size_t sizeY = static_cast<size_t>(imageSize().height());
+//    /** convert raw memory data to QImage format */
+//    QImage toQImage()
+//    {
+//        // get current image size
+//        const size_t sizeX = static_cast<size_t>(imageSize().width());
+//        const size_t sizeY = static_cast<size_t>(imageSize().height());
 
-        auto maxValue = *max_element(std::begin(grayVector), std::end(grayVector));
-        auto minValue = *min_element(std::begin(grayVector), std::end(grayVector));
-        float maxDivider = (maxValue-minValue);
+//        auto maxValue = *max_element(std::begin(grayVector), std::end(grayVector));
+//        auto minValue = *min_element(std::begin(grayVector), std::end(grayVector));
+//        float maxDivider = (maxValue-minValue);
 
-        LOG_INFO() << "max" << maxValue;
-        LOG_INFO() << "min" << maxValue;
-        LOG_INFO() << "d" << maxValue;
+//        LOG_INFO() << "max" << maxValue;
+//        LOG_INFO() << "min" << maxValue;
+//        LOG_INFO() << "d" << maxValue;
 
-        // convert gray values into QImage data
-        QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), QImage::Format_ARGB32_Premultiplied);
-        // data[ix + iy*dataPointsY]
-        // data[iy + dataPointsY * ix]
-        for ( size_t y = 0; y < sizeY; ++y )
-        {
-            size_t yoffset = y * sizeX;
-            QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(int(y))) ;
-            for ( size_t x = 0; x < sizeX  ; ++x )
-            {
-                size_t pos = x + yoffset;
-                int color = static_cast<int>((grayVector[static_cast<size_t>(pos)] - minValue) / maxDivider * 255);
-                *line++ = qRgb(color, color, color);
-            }
-        }
+//        // convert gray values into QImage data
+//        QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), QImage::Format_ARGB32_Premultiplied);
+//        // data[ix + iy*dataPointsY]
+//        // data[iy + dataPointsY * ix]
+//        for ( size_t y = 0; y < sizeY; ++y )
+//        {
+//            size_t yoffset = y * sizeX;
+//            QRgb *line = reinterpret_cast<QRgb *>(image.scanLine(int(y))) ;
+//            for ( size_t x = 0; x < sizeX  ; ++x )
+//            {
+//                size_t pos = x + yoffset;
+//                int color = static_cast<int>((grayVector[static_cast<size_t>(pos)] - minValue) / maxDivider * 255);
+//                *line++ = qRgb(color, color, color);
+//            }
+//        }
 
-        // convert to destiny format
-        // image = std::move(image).convertToFormat(dstFormat);
+//        // convert to destiny format
+//        // image = std::move(image).convertToFormat(dstFormat);
 
-        LOG_INFO() << "to QImage from data (finished)";
-        return image;
-    }
+//        LOG_INFO() << "to QImage from data (finished)";
+//        return image;
+//    }
 
-    /** update image data with next image */
-    void updateImageData(QImage& nextImage)
-    {
-        QMutexLocker locker(&mutex);
-        this->lastImage = nextImage;
-        LOG_INFO() << "update Image (finished)";
-    }
+//    /** update image data with next image */
+//    void updateImageData(QImage& nextImage)
+//    {
+//        QMutexLocker locker(&mutex);
+//        this->lastImage = nextImage;
+//        LOG_INFO() << "update Image (finished)";
+//    }
 
 
     /** This function initializes the device and returns a device handle.

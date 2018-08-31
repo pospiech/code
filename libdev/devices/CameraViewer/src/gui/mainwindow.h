@@ -17,16 +17,21 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void testImage();
+    void findCameras();
 
 private slots:
     void on_pushButtonTakeImage_clicked();
 
     void on_actionClose_triggered();
 
+    void on_pushButtonCameraOpen_clicked();
+
+    void on_pushButtonCameraClose_clicked();
+
 private:
     Ui::MainWindow *ui;
     QScopedPointer<CameraInterface> camera;
+    QList<CameraInterface*> cameraList;
 };
 
 #endif // MAINWINDOW_H

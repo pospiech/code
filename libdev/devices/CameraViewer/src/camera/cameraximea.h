@@ -20,6 +20,7 @@ public:
 
     void openCamera();
     void closeCamera();
+    bool isOpen();
 
     float exposure() const;
     void setExposure(float exposure_ms);
