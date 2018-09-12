@@ -26,8 +26,8 @@ QImage CameraImplementation::toQImage(const QSize imageSize)
     float maxDivider = (maxValue-minValue);
 
     LOG_INFO() << "max" << maxValue;
-    LOG_INFO() << "min" << maxValue;
-    LOG_INFO() << "d" << maxValue;
+    LOG_INFO() << "min" << minValue;
+    LOG_INFO() << "d" << maxDivider;
 
     // convert gray values into QImage data
     QImage image = QImage(static_cast<int>(sizeX), static_cast<int>(sizeY), QImage::Format_ARGB32_Premultiplied);

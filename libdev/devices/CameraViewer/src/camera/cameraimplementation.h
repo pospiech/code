@@ -6,6 +6,8 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QSize>
+#include <exception>
+
 
 #include "Logger.h"
 

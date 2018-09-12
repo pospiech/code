@@ -75,8 +75,7 @@ void MainWindow::on_pushButtonTakeImage_clicked()
 {    
     int index = ui->comboBoxCameraSelect->currentData().toInt();
     CameraInterface * camera = cameraList.at(index);
-    if (camera->isOpen()) {
-        camera->setExposure(1);
+    if (camera->isOpen()) {        
         camera->capture();
         LOG_INFO() << " set image to widget";
         ui->widgetCameraImage->setImage(camera->image());
@@ -97,9 +96,11 @@ void MainWindow::on_pushButtonCameraOpen_clicked()
     int index = ui->comboBoxCameraSelect->currentData().toInt();
     CameraInterface * camera = cameraList.at(index);
     camera->openCamera();
+    camera->setExposure(2.0);
     ui->pushButtonCameraClose->setEnabled(true);
     ui->pushButtonCameraOpen->setEnabled(false);
     ui->pushButtonTakeImage->setEnabled(true);
+    ui->widgetCameraParameter->setCameraHandle(camera);
 
 }
 

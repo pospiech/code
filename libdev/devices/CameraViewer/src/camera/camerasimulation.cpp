@@ -63,6 +63,12 @@ void CameraSimulation::setROI(QRect roi)
     d->setROI(roi);
 }
 
+QSize CameraSimulation::sensorSize()
+{
+    Q_D(CameraSimulation);
+    return d->sensorSize();
+}
+
 void CameraSimulation::capture()
 {
     Q_D(CameraSimulation);
@@ -92,4 +98,10 @@ vector<int> CameraSimulation::histogram()
 
     QMutexLocker locker(&d->mutex);
     return d->histVector;
+}
+
+QMap<QString, QString> CameraSimulation::getParamters()
+{
+    Q_D(CameraSimulation);
+    return d->getParamters();
 }

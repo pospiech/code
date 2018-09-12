@@ -69,6 +69,13 @@ void CameraUEye::setROI(QRect roi)
     d->setROI(roi);
 }
 
+QSize CameraUEye::sensorSize()
+{
+    Q_D(CameraUEye);
+    return d->sensorSize();
+}
+
+
 void CameraUEye::capture()
 {
     Q_D(CameraUEye);
@@ -100,4 +107,23 @@ vector<int> CameraUEye::histogram()
 
     QMutexLocker locker(&d->mutex);
     return d->histVector;
+}
+
+QMap<QString, QString> CameraUEye::getParamters()
+{
+    Q_D(CameraUEye);
+    return d->getParamters();
+}
+
+QString CameraUEye::deviceName()
+{
+    Q_D(CameraUEye);
+
+    return d->getParamters().key("Sensor Name");
+}
+
+QString CameraUEye::deviceSerial()
+{
+    Q_D(CameraUEye);
+    return d->getParamters().key("Serial");
 }

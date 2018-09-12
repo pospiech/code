@@ -17,10 +17,11 @@ signals:
 
 public slots:
     void addString(const QString & message);
+    void on_pushButtonClearList_clicked();
 
 private:
     QListView * listView;
-    QPushButton * buttonClear;
+    QPushButton * pushButtonClearList;
     QStringListModel *model;
 };
 

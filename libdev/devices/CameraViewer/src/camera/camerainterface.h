@@ -4,6 +4,8 @@
 #include<QtCore/QRect>
 #include<QImage>
 #include <vector>
+#include <QMap>
+
 
 class CameraInterface
 {
@@ -13,9 +15,10 @@ public:
 
     }
 
-
     virtual QString description() const = 0;
-    virtual QString	errorString() = 0;
+
+    virtual QString deviceName() = 0;
+    virtual QString deviceSerial() = 0;
 
     virtual void capture() = 0;
 
@@ -29,10 +32,14 @@ public:
 
     virtual QRect roi() const = 0;
     virtual void setROI(QRect roi) = 0;
+    virtual QSize sensorSize() = 0;
 
     virtual std::vector<int> data() = 0;
     virtual std::vector<int> histogram() = 0;
     virtual QImage image() = 0;
+
+    virtual QMap<QString, QString> getParamters() = 0;
+
 
 private:
 

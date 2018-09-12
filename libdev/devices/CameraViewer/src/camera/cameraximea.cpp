@@ -72,6 +72,13 @@ void CameraXimea::setROI(QRect roi)
     d->setROI(roi);
 }
 
+QSize CameraXimea::sensorSize()
+{
+    Q_D(CameraXimea);
+    return d->sizeSensor;
+}
+
+
 void CameraXimea::capture()
 {
     Q_D(CameraXimea);
@@ -106,3 +113,22 @@ vector<int> CameraXimea::histogram()
     QMutexLocker locker(&d->mutex);
     return d->histVector;
 }
+
+QMap<QString, QString> CameraXimea::getParamters()
+{
+    Q_D(CameraXimea);
+    return d->getParamters();
+}
+
+QString CameraXimea::deviceName()
+{
+    Q_D(CameraXimea);
+    return d->deviceInfo(d->cameraNumber, XI_PRM_DEVICE_NAME);
+}
+
+QString CameraXimea::deviceSerial()
+{
+    Q_D(CameraXimea);
+    return d->deviceInfo(d->cameraNumber, XI_PRM_DEVICE_SN);
+}
+

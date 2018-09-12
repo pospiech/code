@@ -63,7 +63,8 @@ HEADERS += \
     log/signalappender.h \
     camera/camerasimulation.h \
     camera/camerasimulation_p.h \
-    camera/cameraimplementation.h
+    camera/cameraimplementation.h \
+    gui/widgetcameraparameter.h
 
 SOURCES += \
     #camera/QCameraImage/QRgbMatrix.cpp \
@@ -78,7 +79,9 @@ SOURCES += \
     gui/widgetmessagelist.cpp \
     log/signalappender.cpp \
     camera/camerasimulation.cpp \
-    camera/cameraimplementation.cpp
+    camera/cameraimplementation.cpp \
+    gui/widgetcameraparameter.cpp
 
 FORMS += \
-    gui/mainwindow.ui
+    gui/mainwindow.ui \
+    form.ui

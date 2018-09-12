@@ -15,7 +15,9 @@ public:
     virtual ~CameraSimulation();
 
     QString description() const { return "Camera Simulation"; }
-    QString	errorString() {return ""; }
+    QString deviceName() { return "Simulation"; }
+    QString deviceSerial() {return "0123"; }
+
 
     void openCamera();
     void closeCamera();
@@ -28,6 +30,7 @@ public:
 
     QRect roi() const;
     void setROI(QRect roi);
+    QSize sensorSize();
 
     bool initialize();
 
@@ -35,6 +38,8 @@ public:
 
     std::vector<int> data();
     std::vector<int> histogram();
+
+    QMap<QString, QString> getParamters();
 
 protected:
     const QScopedPointer<CameraSimulationPrivate> d_ptr;

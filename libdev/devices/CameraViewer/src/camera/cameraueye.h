@@ -19,7 +19,9 @@ public:
     virtual ~CameraUEye();
 
     QString description() const { return "uEye"; }
-    QString	errorString() {return ""; }
+    QString deviceName();
+    QString deviceSerial();
+
 
     void openCamera();
     void closeCamera();
@@ -32,6 +34,7 @@ public:
 
     QRect roi() const;
     void setROI(QRect roi);
+    QSize sensorSize();
 
     bool initialize();
 
@@ -39,6 +42,8 @@ public:
 
     std::vector<int> data();
     std::vector<int> histogram();
+
+    QMap<QString, QString> getParamters();
 
 protected:
     const QScopedPointer<CameraUEyePrivate> d_ptr;

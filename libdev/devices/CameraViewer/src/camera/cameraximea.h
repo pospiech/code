@@ -16,7 +16,9 @@ public:
     virtual ~CameraXimea();
 
     QString description() const { return "XIMEA"; }
-    QString	errorString() {return ""; }
+    QString deviceName();
+    QString deviceSerial();
+
 
     void openCamera();
     void closeCamera();
@@ -29,6 +31,7 @@ public:
 
     QRect roi() const;
     void setROI(QRect roi);    
+    QSize sensorSize();
 
     bool initialize();
 
@@ -36,6 +39,8 @@ public:
 
     std::vector<int> data();
     std::vector<int> histogram();
+
+    QMap<QString, QString> getParamters();
 
 protected:
     const QScopedPointer<CameraXimeaPrivate> d_ptr;

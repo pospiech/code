@@ -226,7 +226,7 @@ public:
         int value;
         XI_RETURN stat = xiGetParamInt(xiHandle, XI_PRM_EXPOSURE, &value);
         errorHandler(stat);
-        return value / 1000; // us -> ms
+        return value / 1000.0; // us -> ms
     }
 
     /** Sets gain in dB. */
@@ -329,7 +329,7 @@ public:
 
         errorHandler(stat);
 
-        return QString::fromLocal8Bit(value, static_cast<int>(size));
+        return QString::fromLocal8Bit(value);
     }
 
     /** get parameters of camera, results are in QMap */
@@ -341,19 +341,25 @@ public:
             // device model id as number
             int model_id;
             errorHandler(xiGetParamInt(xiHandle, XI_PRM_DEVICE_MODEL_ID, &model_id));
-            mapParam.insert("ModelID", QString().arg(model_id));
+            mapParam.insert("ModelID", QString("%1").arg(model_id));
 
             //! Returns the device sensor model id.
             // device sensor id as number
             int sensor_id;
             errorHandler(xiGetParamInt(xiHandle, XI_PRM_SENSOR_MODEL_ID, &sensor_id));
-            mapParam.insert("SensorID", QString().arg(sensor_id));
+            mapParam.insert("Sensor ID", QString("%1").arg(sensor_id));
 
             //! Returns device serial number. Only string form is possible.
             //! It might contain also alphabet characters.
             char sn[20];
             errorHandler(xiGetParamString(xiHandle, XI_PRM_DEVICE_SN, sn, sizeof(sn)));
-            mapParam.insert("DeviceSN", QString(sn));
+            mapParam.insert("Device SN", QString(sn));
+
+            QString strDeviceName = deviceInfo(0, XI_PRM_DEVICE_NAME);
+            mapParam.insert("Device Name", strDeviceName);
+
+            QString strDeviceType = deviceInfo(0, XI_PRM_DEVICE_TYPE);
+            mapParam.insert("Device Type", strDeviceType);
         }
         catch(const std::exception& e)
         {
@@ -467,6 +473,10 @@ public:
             }
 
             LOG_WARNING() << "CameraViewer: Ximea Error Code: "<< retCode << errString << endl;
+            if (retCode == XI_OUT_OF_RANGE)
+                throw std::out_of_range(errString.toStdString());
+            else
+                throw std::runtime_error(errString.toStdString());
         }
     }
 };
