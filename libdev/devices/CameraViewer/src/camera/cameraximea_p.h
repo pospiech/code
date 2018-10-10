@@ -27,7 +27,7 @@ public:
     XI_IMG image;
 
     // windows handle
-    HANDLE xiHandle = NULL;
+    HANDLE xiHandle = nullptr;
 
     // camera number and count
     size_t cameraNumber = 0;
@@ -113,14 +113,6 @@ public:
     }
 
 
-//    /** update image data with next image */
-//    void updateImageData(QImage& nextImage)
-//    {
-//        QMutexLocker locker(&mutex);
-//        this->lastImage = nextImage;
-//        LOG_INFO() << "update Image (finished)";
-//    }
-
     /** stores camera Number for futher usage
      */
     void setCameraNumber(size_t cameraNumber)
@@ -141,8 +133,12 @@ public:
         XI_RETURN stat = XI_OK;
         stat = xiOpenDevice(static_cast<DWORD>(cameraNumber), &xiHandle);
         errorHandler(stat);
-        if (stat == XI_OK)
+        if (stat == XI_OK){
             isOpen = true;
+            // update size of sensor
+            sensorSize() ;
+        }
+
         LOG_INFO() << "open Camera";
     }
 
@@ -226,7 +222,23 @@ public:
         int value;
         XI_RETURN stat = xiGetParamInt(xiHandle, XI_PRM_EXPOSURE, &value);
         errorHandler(stat);
-        return value / 1000.0; // us -> ms
+        return value / 1000.0f; // us -> ms
+    }
+
+    float exposureMin() const
+    {
+        int value;
+        XI_RETURN stat = xiGetParamInt(xiHandle, XI_PRM_EXPOSURE XI_PRM_INFO_MIN, &value);
+        errorHandler(stat);
+        return value / 1000.0f; // us -> ms
+    }
+
+    float exposureMax() const
+    {
+        int value;
+        XI_RETURN stat = xiGetParamInt(xiHandle, XI_PRM_EXPOSURE XI_PRM_INFO_MAX, &value);
+        errorHandler(stat);
+        return value / 1000.0f; // us -> ms
     }
 
     /** Sets gain in dB. */
@@ -237,10 +249,26 @@ public:
     }
 
     /** gain in dB. */
-    float gain()
+    float gain() const
     {
         float gain_in_db;
         XI_RETURN stat = xiGetParamFloat(xiHandle, XI_PRM_GAIN, &gain_in_db );
+        errorHandler(stat);
+        return gain_in_db;
+    }
+
+    float gainMax() const
+    {
+        float gain_in_db;
+        XI_RETURN stat = xiGetParamFloat(xiHandle, XI_PRM_GAIN XI_PRM_INFO_MAX, &gain_in_db );
+        errorHandler(stat);
+        return gain_in_db;
+    }
+
+    float gainMin() const
+    {
+        float gain_in_db;
+        XI_RETURN stat = xiGetParamFloat(xiHandle, XI_PRM_GAIN XI_PRM_INFO_MIN, &gain_in_db );
         errorHandler(stat);
         return gain_in_db;
     }
@@ -280,15 +308,6 @@ public:
                                    static_cast<XI_IMG_FORMAT>(formatCode)));
     }
 
-    /** set ROI using offets and width and height */
-    void setROI(QRect roi)
-    {
-        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_X, roi.x()));
-        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_Y, roi.y()));
-        errorHandler(xiSetParamInt(xiHandle, XI_PRM_WIDTH, roi.width()));
-        errorHandler(xiSetParamInt(xiHandle, XI_PRM_HEIGHT, roi.height()));
-    }
-
     /** get ROI using offets and width and height */
     QRect roi() const
     {
@@ -302,8 +321,123 @@ public:
         roi.setWidth(value);
         errorHandler(xiGetParamInt(xiHandle, XI_PRM_HEIGHT, &value));
         roi.setHeight(value);
+
+//        // test min and max
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_X XI_PRM_INFO_MIN, &value));
+//        LOG_INFO() << "roi x min:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_Y XI_PRM_INFO_MIN, &value));
+//        LOG_INFO() << "roi y min:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_WIDTH XI_PRM_INFO_MIN, &value));
+//        LOG_INFO() << "roi dx min:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_HEIGHT XI_PRM_INFO_MIN, &value));
+//        LOG_INFO() << "roi dy min:" << value << endl;
+
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_X XI_PRM_INFO_MAX, &value));
+//        LOG_INFO() << "roi x max:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_Y XI_PRM_INFO_MAX, &value));
+//        LOG_INFO() << "roi y max:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_WIDTH XI_PRM_INFO_MAX, &value));
+//        LOG_INFO() << "roi dx max:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_HEIGHT XI_PRM_INFO_MAX, &value));
+//        LOG_INFO() << "roi dy max:" << value;
+
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_X XI_PRM_INFO_INCREMENT, &value));
+//        LOG_INFO() << "roi x inc:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_OFFSET_Y XI_PRM_INFO_INCREMENT, &value));
+//        LOG_INFO() << "roi y inc:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_WIDTH XI_PRM_INFO_INCREMENT, &value));
+//        LOG_INFO() << "roi dx inc:" << value;
+//        errorHandler(xiGetParamInt(xiHandle, XI_PRM_HEIGHT XI_PRM_INFO_INCREMENT, &value));
+//        LOG_INFO() << "roi dy inc:" << value;
+
+//        roi x min: 0
+//        roi y min: 0
+//        roi dx min: 16
+//        roi dy min: 2
+
+//        roi x max: 0
+//        roi y max: 0
+//        roi dx max: 1280
+//        roi dy max: 1024
+
+//        roi x inc: 16
+//        roi y inc: 2
+//        roi dx inc: 16
+//        roi dy inc: 2
         return roi;
     }
+
+
+    /** set ROI using offets and width and height */
+    void setROI(QRect roi)
+    {
+        QRect currROI = this->roi();
+        if (roi.top() > currROI.top()) {
+            // width and heigt must be reduced before offset
+            // otherwise offset max and min values are limited.
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_HEIGHT, roi.height()), "dy");
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_Y, roi.y()), "y");
+        }
+        else {
+            // offset must be reset first to ensure higher height is possible
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_Y, roi.y()), "y");
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_HEIGHT, roi.height()), "dy");
+        }
+        // similar for width ...
+        if (roi.left() > currROI.left()) {
+            // width and heigt must be reduced before offset
+            // otherwise offset max and min values are limited.
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_WIDTH, roi.width()), "dx");
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_X, roi.x()), "x");
+        }
+        else {
+            // offset must be reset first to ensure higher width is possible
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_X, roi.x()), "x");
+            errorHandler(xiSetParamInt(xiHandle, XI_PRM_WIDTH, roi.width()), "dx");
+        }
+    }
+
+
+    /** get binning increment in X direction */
+    int binningIncrementX() const
+    {
+        int value;
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_WIDTH XI_PRM_INFO_INCREMENT, &value));
+        return value;
+    }
+
+    /** get binning increment in Y direction */
+    int binningIncrementY() const
+    {
+        int value;
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_HEIGHT XI_PRM_INFO_INCREMENT, &value));
+        return value;
+    }
+
+
+    /** get ROI using offets and width and height */
+    QSize sensorSize()
+    {
+        // restore roi
+        QRect currROI = roi();
+        // set offsets to 0
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_X, 0), "x");
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_Y, 0), "x");
+
+        // get min max values
+        int value;
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_WIDTH XI_PRM_INFO_MAX, &value));
+        this->sizeSensor.setWidth(value);
+        errorHandler(xiGetParamInt(xiHandle, XI_PRM_HEIGHT XI_PRM_INFO_MAX, &value));
+        this->sizeSensor.setHeight(value);
+
+        // reset offsets
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_X, currROI.x()), "x");
+        errorHandler(xiSetParamInt(xiHandle, XI_PRM_OFFSET_Y, currROI.y()), "x");
+
+        return this->sizeSensor;
+    }
+
 
     /** This function returns selected parameter of camera without opening it.
      * It allows to quickly get information from each camera in multiple camera setups.
@@ -382,7 +516,7 @@ public:
     }
 
     /** handle camera error messages */
-    void errorHandler(int retCode) const
+    void errorHandler(int retCode, QString strInformation = "") const
     {
         if (retCode != XI_OK)
         {
@@ -472,7 +606,7 @@ public:
             case XI_OUT_OF_RANGE           : errString = "Parameter value is out of range"; break;
             }
 
-            LOG_WARNING() << "CameraViewer: Ximea Error Code: "<< retCode << errString << endl;
+            LOG_WARNING() << "CameraViewer: Ximea Error Code: "<< retCode << errString << strInformation << endl;
             if (retCode == XI_OUT_OF_RANGE)
                 throw std::out_of_range(errString.toStdString());
             else

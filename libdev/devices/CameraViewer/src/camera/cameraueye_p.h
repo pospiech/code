@@ -376,6 +376,23 @@ public:
         return exposure_ms;
     }
 
+    float exposureMin() const
+    {
+        int value;
+//        XI_RETURN stat = xiGetParamInt(xiHandle, XI_PRM_EXPOSURE XI_PRM_INFO_MIN, &value);
+//        errorHandler(stat);
+        return value / 1000.0f; // us -> ms
+    }
+
+    float exposureMax() const
+    {
+        int value;
+//        XI_RETURN stat = xiGetParamInt(xiHandle, XI_PRM_EXPOSURE XI_PRM_INFO_MAX, &value);
+//        errorHandler(stat);
+        return value / 1000.0f; // us -> ms
+    }
+
+
     /** Sets gain factor */
     void setGain(float gain)
     {
@@ -392,11 +409,29 @@ public:
     }
 
     /** gain factor */
-    float gain()
+    float gain() const
     {
         INT result = is_SetHWGainFactor(m_hCam, IS_GET_MASTER_GAIN_FACTOR, 0);
         return static_cast<float>(result)/100;
     }
+
+    float gainMax() const
+    {
+        float gain_in_db;
+//        XI_RETURN stat = xiGetParamFloat(xiHandle, XI_PRM_GAIN XI_PRM_INFO_MIN, &gain_in_db );
+//        errorHandler(stat);
+        return gain_in_db;
+    }
+
+    float gainMin() const
+    {
+        float gain_in_db;
+//        XI_RETURN stat = xiGetParamFloat(xiHandle, XI_PRM_GAIN XI_PRM_INFO_MAX, &gain_in_db );
+//        errorHandler(stat);
+        return gain_in_db;
+    }
+
+
 
     /** get parameters of camera, results are in QMap */
     QMap<QString, QString> getParamters()

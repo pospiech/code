@@ -57,6 +57,43 @@ void CameraUEye::setExposure(float exposure_ms)
     d->setExposure(exposure_ms);
 }
 
+float CameraUEye::exposureMax() const
+{
+    Q_D(const CameraUEye);
+    return d->exposureMax();
+}
+
+float CameraUEye::exposureMin() const
+{
+    Q_D(const CameraUEye);
+    return d->exposureMin();
+}
+
+
+float CameraUEye::gain() const
+{
+    Q_D(const CameraUEye);
+    return d->gain();
+}
+
+float CameraUEye::gainMax() const
+{
+    Q_D(const CameraUEye);
+    return d->gainMax();
+}
+
+float CameraUEye::gainMin() const
+{
+    Q_D(const CameraUEye);
+    return d->gainMin();
+}
+
+void CameraUEye::setGain(float gain)
+{
+    Q_D(CameraUEye);
+    d->setGain(gain);
+}
+
 QRect CameraUEye::roi() const
 {
     Q_D(const CameraUEye);

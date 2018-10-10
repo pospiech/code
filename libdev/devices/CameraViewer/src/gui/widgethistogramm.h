@@ -11,6 +11,8 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QLogValueAxis>
+
 QT_CHARTS_USE_NAMESPACE
 
 #include <vector>
@@ -30,10 +32,13 @@ public slots:
 
 private:
     QLineSeries * series;
+    QLineSeries * serieslog;
     QChart * chart;
     QChartView * chartView;
-    QValueAxis * xAxis;
-    QValueAxis * yAxis;
+    QValueAxis * axisX;
+    QValueAxis * axisY;
+//    QLogValueAxis * axisY3;
+    QValueAxis * axisY3;
 
 
 };

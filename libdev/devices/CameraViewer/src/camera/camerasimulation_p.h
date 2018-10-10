@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <cmath>
+#include <stdlib.h>
 
 class CameraSimulationPrivate: public CameraImplementation
 {
@@ -38,7 +39,8 @@ public:
         if (correctionValue  < 1)
             correctionValue  = 1.0;
         for (int i=0; i < pixels; ++i){
-            imageVector[i] = std::fmod(i*correctionValue,65535);
+            float value = i + std::rand() % 1000;
+            imageVector[i] = std::fmod(value*correctionValue,65535);
         }
     }
 

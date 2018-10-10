@@ -28,10 +28,19 @@ public:
     virtual bool isOpen() = 0;
 
     virtual float exposure() const = 0;
+    virtual float exposureMax() const = 0;
+    virtual float exposureMin() const = 0;
     virtual void setExposure(float exposure) = 0;
+
+    virtual float gain() const = 0;
+    virtual float gainMax() const = 0;
+    virtual float gainMin() const = 0;
+    virtual void setGain(float gain) = 0;
 
     virtual QRect roi() const = 0;
     virtual void setROI(QRect roi) = 0;
+    virtual int binningIncrementX() const = 0;
+    virtual int binningIncrementY() const = 0;
     virtual QSize sensorSize() = 0;
 
     virtual std::vector<int> data() = 0;

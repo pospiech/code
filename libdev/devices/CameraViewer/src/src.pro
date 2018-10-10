@@ -64,7 +64,8 @@ HEADERS += \
     camera/camerasimulation.h \
     camera/camerasimulation_p.h \
     camera/cameraimplementation.h \
-    gui/widgetcameraparameter.h
+    gui/widgetcameraparameter.h \
+    gui/widgetcameraparameter_gui.h
 
 SOURCES += \
     #camera/QCameraImage/QRgbMatrix.cpp \

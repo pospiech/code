@@ -44,6 +44,7 @@ void WidgetMessageList::addString(const QString & message)
     if(model->insertRow(model->rowCount())) {
         QModelIndex index = model->index(model->rowCount() - 1, 0);
         model->setData(index, message);
+        listView->scrollTo(index);
     }
 }
 

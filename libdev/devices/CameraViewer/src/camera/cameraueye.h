@@ -29,12 +29,21 @@ public:
 
     float exposure() const;
     void setExposure(float exposure_ms);
+    float exposureMax() const;
+    float exposureMin() const;
+
+    float gain() const;
+    float gainMax() const;
+    float gainMin() const;
+    void setGain(float gain);
 
     void capture();
 
     QRect roi() const;
     void setROI(QRect roi);
     QSize sensorSize();
+    int binningIncrementX() const { return 1;}
+    int binningIncrementY() const { return 1;}
 
     bool initialize();
 

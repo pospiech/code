@@ -60,6 +60,45 @@ void CameraXimea::setExposure(float exposure_ms)
     d->setExposure(exposure_ms);
 }
 
+float CameraXimea::exposureMax() const
+{
+    Q_D(const CameraXimea);
+    return d->exposureMax();
+}
+
+float CameraXimea::exposureMin() const
+{
+    Q_D(const CameraXimea);
+    return d->exposureMin();
+}
+
+
+float CameraXimea::gain() const
+{
+    Q_D(const CameraXimea);
+    return d->gain();
+}
+
+float CameraXimea::gainMax() const
+{
+    Q_D(const CameraXimea);
+    return d->gainMax();
+}
+
+float CameraXimea::gainMin() const
+{
+    Q_D(const CameraXimea);
+    return d->gainMin();
+}
+
+void CameraXimea::setGain(float gain)
+{
+    Q_D(CameraXimea);
+    d->setGain(gain);
+}
+
+
+
 QRect CameraXimea::roi() const
 {
     Q_D(const CameraXimea);    
@@ -75,8 +114,21 @@ void CameraXimea::setROI(QRect roi)
 QSize CameraXimea::sensorSize()
 {
     Q_D(CameraXimea);
-    return d->sizeSensor;
+    return d->sensorSize();
 }
+
+int CameraXimea::binningIncrementX() const
+{
+    Q_D(const CameraXimea);
+    return d->binningIncrementX();
+}
+
+int CameraXimea::binningIncrementY() const
+{
+    Q_D(const CameraXimea);
+    return d->binningIncrementY();
+}
+
 
 
 void CameraXimea::capture()
