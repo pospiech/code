@@ -16,6 +16,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QCheckBox>
+
 
 class Ui_Form
 {
@@ -57,6 +59,7 @@ public:
     QSpinBox *spinBoxdY;
     QSpacerItem *verticalSpacerAquProp;
     QPushButton *pushButtonResetROI;
+    QCheckBox *checkBoxShowROI;
 
 
     void setupUi(QWidget *Form)
@@ -177,6 +180,11 @@ public:
         pushButtonResetROI = new QPushButton(pageProperties);
         gridLayoutROI->addWidget(pushButtonResetROI, 2, 1, 1, 3);
 
+        checkBoxShowROI = new QCheckBox(pageProperties);
+        checkBoxShowROI->setText("show ROI");
+        gridLayoutROI->addWidget(checkBoxShowROI, 2, 0, 1, 1);
+
+
         verticalSpacerAquProp = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         gridLayoutPageProperties->addItem(verticalSpacerAquProp, 4, 1, 1, 1);
@@ -195,7 +203,7 @@ public:
         toolBox->setCurrentIndex(2);
 
 
-        QMetaObject::connectSlotsByName(Form);
+//        QMetaObject::connectSlotsByName(Form);
     } // setupUi
 
     void retranslateUi(QWidget *Form)

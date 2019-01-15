@@ -70,28 +70,44 @@ void WidgetHistogramm::setData(const std::vector<int> data)
         return;
     }
 
-    auto max = *max_element(std::begin(data), std::end(data)) / 100;
+    QTime myTimer;
+    myTimer.start();
 
-    QVector<QPointF> points(data.size());
-    QVector<QPointF> pointsLog(data.size());
-
-    // calculate log values
+    QVector<QPointF> points(static_cast<int>(data.size()));
+    QVector<QPointF> pointsLog(static_cast<int>(data.size()));
     std::vector<float> logvalues(data.size());
-    float logValue = 0;
-    for(std::vector<int>::size_type i = 0; i != data.size(); ++i) {
-        if (data[i] > 0) {
-            logValue = log10(data[i]);
+
+    // maximum value
+    auto max = *max_element(std::begin(data), std::end(data)) / 100.0f;
+
+    // log only valid if any value > 0
+    if ( max > 0) {
+        // calculate log values
+        float logValue = 0;
+        for(std::vector<int>::size_type i = 0; i != data.size(); ++i) {
+            if (data[i] > 0) {
+                logValue = log10(static_cast<float>(data[i]));
+            }
+            else {
+                logValue = 0;
+            }
+            logvalues[i] = logValue;
         }
-        else {
-            logValue = 0;
-        }
-        logvalues[i] = logValue;
     }
-    auto maxlog = *max_element(std::begin(logvalues), std::end(logvalues)) / 100;
+    else {
+        std::fill (logvalues.begin(),logvalues.end(),0);
+    }
+    auto maxlog = *max_element(std::begin(logvalues), std::end(logvalues)) / 100.0f;
+
+    if (maxlog <= 0) {
+        LOG_ERROR() << " all points are value 0";
+        return;
+    }
 
     for(std::vector<int>::size_type i = 0; i != data.size(); ++i) {
-      points[i] = QPointF(i, data[i]/max);
-      pointsLog[i] = QPointF(i, logvalues[i]/maxlog);
+        const int index = static_cast<int>(i);
+        points[index] = QPointF(index, static_cast<double>(data[i]/max));
+        pointsLog[index] = QPointF(index, static_cast<double>(logvalues[i]/maxlog));
     }
 
     series->replace(points);
@@ -101,5 +117,7 @@ void WidgetHistogramm::setData(const std::vector<int> data)
     chart->axisY()->setRange(0, 100);
     chart->axisX(serieslog)->setRange(0, data.size());
     chart->axisY(serieslog)->setRange(0, 100);
+
+    LOG_INFO() << "time for histogram plot" << myTimer.elapsed()/1000.0 << " / seconds";
 }
 

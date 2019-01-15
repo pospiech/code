@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "camera/camerabasler.h"
 #include "camera/cameraximea.h"
 #include "camera/cameraueye.h"
 #include "camera/camerasimulation.h"
@@ -34,11 +35,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // find cameras and add to list
     findCameras();
+
+    // set ratio for splitter
+    QList<int> sizes({400, 200});
+    ui->splitter->setSizes(sizes);
+    ui->tabWidget->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    qDeleteAll(cameraList);
 }
 
 
@@ -46,8 +54,14 @@ MainWindow::~MainWindow()
 void MainWindow::findCameras()
 {
     // test ueye Cameras
+    CameraBasler * cameraBasler = new CameraBasler;
+    bool isReady = cameraBasler->initialize();
+    if (isReady)
+        cameraList.append(cameraBasler);
+
+    // test ueye Cameras
     CameraUEye * cameraUEye = new CameraUEye;
-    bool isReady = cameraUEye->initialize();
+    isReady = cameraUEye->initialize();
     if (isReady)
         cameraList.append(cameraUEye);
 
@@ -67,7 +81,9 @@ void MainWindow::findCameras()
     {
         ui->comboBoxCameraSelect->addItem(cameraList.at(i)->description(), i);
     }
-
+    if (cameraList.size() > 0) {
+        ui->comboBoxCameraSelect->setCurrentIndex(0);
+    }
 
 }
 
@@ -93,26 +109,28 @@ void MainWindow::on_actionClose_triggered()
 
 void MainWindow::on_pushButtonCameraOpen_clicked()
 {
-    int index = ui->comboBoxCameraSelect->currentData().toInt();
-    CameraInterface * camera = cameraList.at(index);
-    camera->openCamera();
-    camera->setExposure(2.0);
-    ui->pushButtonCameraClose->setEnabled(true);
-    ui->pushButtonCameraOpen->setEnabled(false);
-    ui->pushButtonTakeImage->setEnabled(true);
-    ui->widgetCameraParameter->setCameraHandle(camera);
-
+    int index = ui->comboBoxCameraSelect->currentIndex();
+    if (index >= 0) {
+        CameraInterface * camera = cameraList.at(index);
+        camera->openCamera();
+//        camera->setExposure(2.0);
+        ui->pushButtonCameraClose->setEnabled(true);
+        ui->pushButtonCameraOpen->setEnabled(false);
+        ui->pushButtonTakeImage->setEnabled(true);
+        ui->tabWidget->setEnabled(true);
+        ui->widgetCameraParameter->setCameraHandle(camera);
+    }
 }
 
 void MainWindow::on_pushButtonCameraClose_clicked()
 {
-    int index = ui->comboBoxCameraSelect->currentData().toInt();
-    if (index>0) {
+    int index = ui->comboBoxCameraSelect->currentIndex();
+    if (index >= 0) {
         CameraInterface * camera = cameraList.at(index);
         camera->closeCamera();
     }
     ui->pushButtonCameraClose->setEnabled(false);
     ui->pushButtonCameraOpen->setEnabled(true);
     ui->pushButtonTakeImage->setEnabled(false);
-
+    ui->tabWidget->setEnabled(false);
 }

@@ -73,6 +73,10 @@ ImageViewer::ImageViewer(QWidget *parent) : QWidget(parent)
     layout->addWidget(scrollArea);
 
     createActions(scrollArea);
+
+    fitToWindowAct->setEnabled(true);
+    fitToWindowAct->setChecked(true);
+    updateActions();
 }
 
 ImageViewer::~ImageViewer()
@@ -104,18 +108,15 @@ void ImageViewer::setImage(const QImage &newImage)
     image = newImage;
     LOG_INFO() << image.width() << image.height();
     imageLabel->setPixmap(QPixmap::fromImage(image));
-    normalSize();
+//    normalSize();
+
 
     scrollArea->setVisible(true);
-
-    scaleFactor = 1.0;
-
-    scrollArea->setVisible(true);
-    fitToWindowAct->setEnabled(true);
-    updateActions();
 
     if (!fitToWindowAct->isChecked())
         imageLabel->adjustSize();
+    else
+        fitToWindow();
 
 }
 
@@ -236,9 +237,10 @@ void ImageViewer::createActions(QWidget *parent)
 void ImageViewer::updateActions()
 {
     saveAsAct->setEnabled(!image.isNull());
-    zoomInAct->setEnabled(!fitToWindowAct->isChecked());
-    zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
-    normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
+    bool isfitToWindow = fitToWindowAct->isChecked();
+    zoomInAct->setEnabled(!isfitToWindow);
+    zoomOutAct->setEnabled(!isfitToWindow);
+    normalSizeAct->setEnabled(!isfitToWindow);
 }
 
 

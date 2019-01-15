@@ -91,6 +91,9 @@ WidgetCameraParameter::WidgetCameraParameter(QWidget *parent)
     connect(ui->spinBoxdY, &QSpinBox::editingFinished,
            this, &WidgetCameraParameter::on_spinBoxdY_editingFinished);
 
+
+    connect(ui->pushButtonResetROI, &QPushButton::pressed,
+            this, &WidgetCameraParameter::on_pushButtonResetROI_pressed);
 }
 
 
@@ -142,6 +145,7 @@ void WidgetCameraParameter::setCameraHandle(CameraInterface* handle)
 
     // get current camera values
     ui->doubleSpinBoxExposure->setValue(static_cast<double>(camera->exposure()));
+    ui->doubleSpinBoxGain->setValue(static_cast<double>(camera->gain()));
     QSize sensorSize = camera->sensorSize();
     ui->labelSensorSizeX->setText(QString("x = %1 px (width)").arg(sensorSize.width()));
     ui->labelSensorSizeY->setText(QString("y = %1 px (height)").arg(sensorSize.height()));
@@ -272,8 +276,8 @@ void WidgetCameraParameter::on_doubleSpinBoxGain_valueChanged(double value)
         LOG_ERROR() << "no camera loaded";
         return;
     }
-    if (!(value>0)){
-        LOG_ERROR() << "Exposure value must be > 0";
+    if (!(value>=0)){
+        LOG_ERROR() << "Gain value must be > 0";
         return;
     }
     if (camera->isOpen())
@@ -420,3 +424,29 @@ void WidgetCameraParameter::on_spinBoxdY_editingFinished()
     correctParameterROI(ui->spinBoxdY, camera->binningIncrementY());
 }
 
+void WidgetCameraParameter::on_pushButtonResetROI_pressed()
+{
+    QSize sensorSize = camera->sensorSize();
+    QRect roi;
+    roi.setTopLeft(QPoint(0,0));
+    roi.setWidth(sensorSize.width());
+    roi.setHeight(sensorSize.height());
+    camera->setROI(roi);
+
+    ui->spinBoxX->blockSignals(true);
+    ui->spinBoxY->blockSignals(true);
+    ui->spinBoxdX->blockSignals(true);
+    ui->spinBoxdY->blockSignals(true);
+
+    ui->spinBoxX->setValue(0);
+    ui->spinBoxY->setValue(0);
+    ui->spinBoxdX->setMaximum(sensorSize.width());
+    ui->spinBoxdY->setMaximum(sensorSize.height());
+    ui->spinBoxdX->setValue(sensorSize.width());
+    ui->spinBoxdY->setValue(sensorSize.height());
+
+    ui->spinBoxX->blockSignals(false);
+    ui->spinBoxY->blockSignals(false);
+    ui->spinBoxdX->blockSignals(false);
+    ui->spinBoxdY->blockSignals(false);
+}

@@ -42,6 +42,7 @@ private slots:
     void on_spinBoxY_editingFinished();
     void on_spinBoxdY_editingFinished();
 
+    void on_pushButtonResetROI_pressed();
 
 private:
     Ui::WidgetCameraParameter *ui;

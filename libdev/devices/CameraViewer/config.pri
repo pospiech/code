@@ -21,6 +21,7 @@ QT += gui
 # QT += gui-private
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QT += charts
+QT += serialport
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
